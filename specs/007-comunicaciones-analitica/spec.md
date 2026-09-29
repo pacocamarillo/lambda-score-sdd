@@ -20,7 +20,7 @@ Al entrar al panel, el organizador ve los eventos recientes con fecha, cantidad 
 
 **Acceptance Scenarios**:
 
-1. **Given** eventos de la organización, **When** la propietaria abre el panel, **Then** ve los más recientes con sus inscripciones y su estado, y puede abrir la lista de participantes de cada uno.
+1. **Given** eventos de la organización, **When** la propietaria abre el panel, **Then** ve los más recientes con fecha, estado y total de inscripciones, puede abrir el desglose de confirmadas, pendientes y rechazadas, y llega a los participantes de ese evento.
 2. **Given** un staff sin acceso a analítica, **When** abre el panel, **Then** no ve métricas de visitas de toda la organización.
 3. **Given** un evento reciente, **When** elige ver inscritos, **Then** llega a la lista de ese evento.
 
@@ -106,9 +106,9 @@ La organización configura identificadores de medición de visitas y de conversi
 
 ### Functional Requirements
 
-- **FR-001**: El inicio del panel MUST mostrar eventos recientes, con fecha, inscripciones y estado, más accesos a crear evento, sitio y configuración. MUST mostrar qué funciones de pago faltan por habilitar, sin tratarlas como métricas.
+- **FR-001**: El inicio del panel MUST mostrar eventos recientes, con nombre, fecha, estado y total de inscripciones. Ese total MUST poder abrirse en confirmadas, pendientes y rechazadas, y cada evento MUST enlazar a sus participantes. Las acciones rápidas MUST ser crear evento, sitio y configuración. Las funciones de pago MUST mostrarse en dos grupos, sin tratarlas como métricas: las que abren su pantalla (medición, dominio propio, analítica, comunicaciones, cronometraje y fotos) y las adicionales, con una línea de para qué sirven (cuentas de pago por evento, cargo por participante, eventos privados, lotes de cupones y roles de staff). El menú de la cuenta MUST ofrecer perfil y cerrar sesión.
 - **FR-002**: La analítica detallada MUST estar disponible solo con la función comercial habilitada, para 7, 30 o 90 días, con filtro opcional por evento.
-- **FR-003**: La analítica MUST separar vistas, visitantes, descargas y búsquedas de fotos, una tendencia diaria, el recorrido de visita a evento a inscripción completada, y un desglose por tipo de página y por evento.
+- **FR-003**: La analítica MUST separar vistas, visitantes, descargas y búsquedas de fotos, una tendencia diaria, el recorrido de visita a evento a inscripción completada, un embudo de fotos y un desglose por tipo de página con vistas y visitantes únicos. MUST explicar cada métrica a petición y MUST poder filtrar por evento.
 - **FR-004**: Las campañas MUST poder dirigirse a contactos elegidos o a inscritos de un evento, con filtro opcional de una competencia.
 - **FR-005**: El equipo MUST poder previsualizar y enviar una prueba antes del envío masivo.
 - **FR-006**: El sistema MUST omitir destinatarios sin los datos que la campaña exige, e MUST informar el motivo, incluyendo folio ausente o correo inválido.
@@ -117,6 +117,8 @@ La organización configura identificadores de medición de visitas y de conversi
 - **FR-009**: Una persona MUST poder darse de baja de campañas. Esa baja MUST NOT cancelar los avisos de su propia inscripción y pago.
 - **FR-010**: Los identificadores de medición externa MUST guardarse solo con la función comercial correspondiente.
 - **FR-011**: Staff sin acceso a analítica, sitio o configuración MUST NOT ver estas secciones.
+- **FR-012**: El listado de contactos MUST buscar por nombre o correo y filtrar por uno o varios eventos en los que la persona participó. MUST mostrar el total, permitir seleccionar la página o todos los encontrados, invitar esa selección a un evento y eliminar un contacto con confirmación. Las columnas MUST ser nombre, correo, eventos y acción.
+- **FR-013**: La pantalla de comunicaciones MUST mostrar la base mensual, el saldo comprado, lo usado en el mes, lo disponible y la fecha de reinicio, más la acción de comprar cupo. MUST listar campañas con nombre, tipo, estado, actualización y detalle, y MUST ofrecer una comunicación rápida. Sin campañas, MUST permitir empezar de un ejemplo o en blanco. Sin la función habilitada, MUST NOT crear ni enviar.
 
 ### Key Entities
 

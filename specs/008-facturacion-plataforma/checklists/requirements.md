@@ -32,4 +32,5 @@
 ## Notes
 
 - Revisión del 2026-09-28: los ítems pasan. Toda la spec es P3 y puede posponerse en un piloto de una sola organización.
+- Revisión del 2026-09-29: la pantalla de la propietaria muestra el periodo en curso, el historial, el débito automático y los datos de la factura siguiente.
 - Lista para `/speckit-clarify` o `/speckit-plan`.

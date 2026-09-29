@@ -31,6 +31,7 @@
 
 ## Notes
 
-- Revisión del 2026-09-28: los ítems pasan. El proveedor de tarjeta queda para el plan técnico, sin nombrar marcas en los requisitos.
+- Revisión del 2026-09-29: los ítems pasan. Stripe, Mercado Pago y la transferencia bancaria son medios que la persona elige, no un detalle interno de implementación. Un evento puede ofrecer varios a la vez.
+- Revisión del 2026-09-29: la gestión de cupones muestra usos, ahorro, filtros y estados disponible, agotado y vencido. La exportación sigue bloqueada sin lotes.
 - Cupones individuales son P2; lotes y exportación son P3.
 - Lista para `/speckit-clarify` o `/speckit-plan`.

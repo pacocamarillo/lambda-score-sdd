@@ -56,8 +56,11 @@ El equipo importa un archivo con folios y tiempos para una competencia. El siste
 
 1. **Given** un archivo con folio y tiempo, **When** el equipo elige la competencia y confirma, **Then** los folios encontrados quedan con su tiempo y los no encontrados se listan sin inventar un participante.
 2. **Given** un tiempo con formato no reconocido, **When** se importa, **Then** esa fila se señala y no se publica un tiempo ambiguo.
-3. **Given** resultados publicados, **When** una visita abre los resultados del evento, **Then** ve folio, nombre y tiempo de las competencias publicadas.
+3. **Given** resultados publicados, **When** una visita abre los resultados del evento, **Then** ve, por categoría, lugar, folio, nombre, tiempo y diferencia respecto al primero.
 4. **Given** una reimportación, **When** el equipo confirma que sobrescribe, **Then** los tiempos de los folios incluidos se actualizan y el resto no se borra.
+5. **Given** resultados publicados con varias categorías, **When** la visita elige ganadores, los tres primeros o la tabla completa, **Then** la tabla se reduce a esa vista y puede expandir o contraer cada categoría.
+6. **Given** la tabla publicada, **When** la visita pide descargarla, **Then** obtiene una hoja con las mismas columnas de la vista elegida.
+7. **Given** un resultado publicado, **When** la visita pide el certificado de ese participante, **Then** puede imprimirlo con evento, categoría, lugar, folio, nombre y tiempo. Si los resultados no están publicados, el certificado no se ofrece.
 
 ---
 
@@ -130,7 +133,9 @@ El organizador genera un código de un solo evento para el staff de cronometraje
 - **FR-003**: El sistema MUST rechazar folios duplicados dentro de la misma competencia.
 - **FR-004**: El operador MUST poder registrar check-in y entrega de kit solo si el pago está aprobado.
 - **FR-005**: El equipo MUST poder importar resultados por folio y tiempo para una competencia, con vista previa y lista de folios sin coincidencia.
-- **FR-006**: Los resultados MUST permanecer ocultos al público hasta que el equipo los publique. Una vez publicados, MUST mostrar folio y tiempo. El organizador MUST poder sustituir esa tabla por un enlace externo mostrado en la página, o abrir las fotos en un enlace externo.
+- **FR-006**: Los resultados MUST permanecer ocultos al público hasta que el equipo los publique. Una vez publicados, MUST mostrar lugar, folio, nombre, tiempo y diferencia respecto al primero, agrupados por categoría. La visita MUST poder ver ganadores, los tres primeros o la tabla completa, y MUST poder expandir o contraer categorías. El organizador MUST poder sustituir esa tabla por un enlace externo mostrado en la página, o abrir las fotos en un enlace externo.
+- **FR-014**: La visita MUST poder descargar la vista publicada de resultados como hoja de cálculo, con las mismas columnas que está viendo.
+- **FR-015**: Cada fila de un resultado publicado MUST ofrecer un certificado imprimible de ese participante. El certificado MUST incluir evento, categoría, lugar, folio, nombre y tiempo, y MUST NOT ofrecerse mientras los resultados sigan sin publicar.
 - **FR-007**: El equipo MUST poder agrupar resultados por un campo del formulario y MUST poder unir dos o más competencias en una tabla pública titulada.
 - **FR-008**: El equipo MUST poder subir fotos del evento. Cada archivo MUST ser JPG o PNG de hasta 15 MB. El evento acepta hasta 5.000 fotos o 25 GB, lo que se alcance primero.
 - **FR-009**: La visita MUST poder recorrer la galería por miniaturas y descargar el original de una foto. Filtrar por folio es opcional y solo muestra coincidencias ya asociadas. La clasificación automática no es obligatoria.
@@ -142,7 +147,7 @@ El organizador genera un código de un solo evento para el staff de cronometraje
 ### Key Entities
 
 - **Registro operativo**: Check-in y entrega de kit de una inscripción, con momento y responsable.
-- **Resultado**: Folio, tiempo y competencia, visible según lo publicado. Puede agruparse por categoría o tabla combinada.
+- **Resultado**: Folio, nombre, tiempo, lugar, diferencia respecto al primero y competencia, visible según lo publicado. Puede agruparse por categoría o tabla combinada, y ofrece certificado solo cuando está publicado.
 - **Archivo de resultados**: Carga con filas de folio y tiempo, asociada a una competencia, con filas aceptadas y rechazadas.
 - **Foto**: Imagen del evento, estado de proceso y folios con los que se puede encontrar.
 - **Código de cronometraje**: Acceso temporal y revocable del staff a un solo evento.
@@ -165,3 +170,4 @@ El organizador genera un código de un solo evento para el staff de cronometraje
 - Los nombres públicos de resultados muestran el nombre del participante. Quien necesite ocultar nombres deberá quedar para una spec posterior; no se promete anonimato en esta versión.
 - La reasignación masiva de folios de toda una competencia es una herramienta interna y se especifica en `008-facturacion-plataforma`, no aquí.
 - La galería de menor costo muestra miniaturas y entrega el original al descargar. Asociar fotos a un folio puede hacerse a mano o con el paquete de procesamiento. Ese paquete pide al menos 50 participantes activos, admite hasta 5.000 fotos o 25 GB por evento y se ejecuta una sola vez.
+- La tabla pública de resultados usa la marca de la organización. Ganadores significa el primer lugar de cada categoría. La diferencia se calcula contra el primer tiempo de esa misma categoría. El certificado es imprimible desde el navegador y no depende de un cronómetro externo.

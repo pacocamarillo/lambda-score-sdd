@@ -32,4 +32,6 @@
 ## Notes
 
 - Revisión del 2026-09-28: los ítems pasan. El resumen del panel es P2; analítica, campañas y medición externa son P3 y dependen de funciones comerciales.
+- Revisión del 2026-09-29: contactos tienen búsqueda, filtro por evento, selección e invitación. Comunicaciones muestran el cupo. La analítica explica métricas, embudos y desglose.
+- Revisión del 2026-09-29, inicio: cada evento reciente abre confirmadas, pendientes y rechazadas. Las funciones de pago quedan en dos grupos y la cuenta ofrece perfil y cerrar sesión.
 - Lista para `/speckit-clarify` o `/speckit-plan`.

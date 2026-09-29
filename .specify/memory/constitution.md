@@ -38,7 +38,7 @@ La experiencia por defecto es español de México y montos en pesos mexicanos. L
 | 2 | resto de 004, 005 y 006 | El organizador opera inscritos, resultados y el participante consulta su folio |
 | 3 | 007 y 008 | Comunicación, analítica y cobro de la plataforma al organizador |
 
-Directorio activo para el siguiente plan: `specs/001-acceso-organizacion`.
+Planes y tareas generados el 2026-09-29. El stack acordado ese día (Next.js en Vercel, PostgreSQL en Neon, archivos en Cloudflare R2) está en `specs/001-acceso-organizacion/plan.md`. Las historias no lo repiten. La implementación empieza por `specs/001-acceso-organizacion`.
 
 | Directorio | Capacidad |
 | --- | --- |
@@ -64,4 +64,4 @@ Esta constitución prevalece sobre una spec en conflicto. Cambiar un principio e
 
 El flujo de cada feature es: especificar, revisar el checklist, aclarar si hace falta, planificar, desglosar tareas e implementar. No se escribe código de producto para una feature sin spec aceptada.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-28 | **Last Amended**: 2026-09-28
+**Version**: 1.0.0 | **Ratified**: 2026-09-28 | **Last Amended**: 2026-09-29

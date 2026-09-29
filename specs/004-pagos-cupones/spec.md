@@ -6,24 +6,25 @@
 
 **Status**: Draft
 
-**Input**: User description: "Cobrar la inscripción con tarjeta o transferencia, verificar comprobantes, y aplicar cupones de descuento."
+**Input**: User description: "Cobrar la inscripción con varias formas de pago a la vez, como Stripe, Mercado Pago y transferencia bancaria, verificar comprobantes, y aplicar cupones de descuento."
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Pagar con tarjeta y quedar confirmado (Priority: P1)
+### User Story 1 - Elegir un medio y pagar en línea (Priority: P1)
 
-Durante la inscripción, la persona paga el total con tarjeta. Si el pago se aprueba, la inscripción queda confirmada y ve la confirmación. Si falla, no queda confirmada y puede reintentar.
+Durante la inscripción, la persona ve los medios activos del evento y elige uno. Si elige Stripe o Mercado Pago, paga el total en ese momento. Si el pago se aprueba, la inscripción queda confirmada. Si falla, no queda confirmada y puede reintentar con el mismo medio o con otro que el evento ofrezca.
 
-**Why this priority**: Es el cierre de la ola 1 junto con la inscripción. El participante necesita una forma de pago que confirme al momento.
+**Why this priority**: Es el cierre de la ola 1 junto con la inscripción. El participante necesita pagar y quedar confirmado, y el organizador necesita ofrecer más de una forma de cobro.
 
-**Independent Test**: Inscribirse a una competencia de precio conocido, pagar con un medio de prueba aprobado y ver la inscripción confirmada por ese monto.
+**Independent Test**: Con Stripe y Mercado Pago activos en el mismo evento, completar un pago de prueba en cada uno y ver la inscripción confirmada por el mismo total.
 
 **Acceptance Scenarios**:
 
-1. **Given** una inscripción lista para pago y el cobro con tarjeta habilitado, **When** el pago se aprueba, **Then** la inscripción queda confirmada por el total mostrado antes de pagar.
-2. **Given** un pago rechazado o cancelado, **When** vuelve al evento, **Then** la inscripción no queda confirmada y puede intentar de nuevo.
-3. **Given** el resumen antes de pagar, **When** hay varios participantes o adicionales, **Then** ve el desglose y el total, y ese total es el que se cobra.
-4. **Given** un pago ya confirmado, **When** intenta pagarlo otra vez, **Then** el sistema informa que ya está pagado y no genera un segundo cobro.
+1. **Given** un evento con Stripe y Mercado Pago activos, **When** la persona abre el pago, **Then** ve ambos, elige uno y paga el total con ese medio. No puede dividir el monto entre los dos.
+2. **Given** el medio elegido aprueba el pago, **When** termina, **Then** la inscripción queda confirmada por el total mostrado antes de pagar, sin importar si el medio fue Stripe o Mercado Pago.
+3. **Given** un pago rechazado o cancelado, **When** vuelve al evento, **Then** la inscripción no queda confirmada y puede intentar de nuevo, incluso con el otro medio.
+4. **Given** el resumen antes de pagar, **When** hay varios participantes o adicionales, **Then** ve el desglose y el total, y ese total es el que se cobra.
+5. **Given** un pago ya confirmado, **When** intenta pagarlo otra vez, **Then** el sistema informa que ya está pagado y no genera un segundo cobro.
 
 ---
 
@@ -45,19 +46,21 @@ Si el evento acepta transferencia, la persona ve las instrucciones, declara el p
 
 ---
 
-### User Story 3 - Elegir medios de pago del evento (Priority: P2)
+### User Story 3 - Ofrecer varios medios en el mismo evento (Priority: P1)
 
-El organizador activa, por evento, cobro con tarjeta y transferencia. Ve un resumen de precios por competencia y de adicionales antes de publicar.
+El organizador decide, en cada evento, cuáles medios se ofrecen: Stripe, Mercado Pago, transferencia bancaria o los que estén disponibles. Puede dejar uno, dos o los tres visibles. Cada inscripción usa solo uno de ellos para el total. La inscripción muestra únicamente los activos. El organizador ve un resumen de precios por competencia y de adicionales antes de publicar.
 
-**Why this priority**: La ola 1 puede operar con ambos medios encendidos por defecto. Elegir por evento evita ofrecer una forma de pago que el organizador no puede conciliar.
+**Why this priority**: Un evento local suele cobrar con transferencia y, a la vez, con tarjeta o con Mercado Pago. Obligar a un solo medio deja fuera a parte de los inscritos.
 
-**Independent Test**: Desactivar la tarjeta en un evento y comprobar que la inscripción solo ofrece transferencia.
+**Independent Test**: Activar los tres medios, comprobar que la inscripción los lista, apagar Mercado Pago y comprobar que los otros dos siguen disponibles.
 
 **Acceptance Scenarios**:
 
-1. **Given** un evento, **When** el organizador deja solo un medio activo, **Then** la inscripción pública ofrece únicamente ese medio.
-2. **Given** ningún medio activo y un precio mayor a cero, **When** intenta publicar, **Then** el sistema no publica hasta que haya forma de pagar o el precio sea cero.
-3. **Given** la organización sin un medio de tarjeta conectado, **When** intenta activar el cobro con tarjeta, **Then** se le indica que primero debe conectar el cobro en la configuración de la organización.
+1. **Given** Stripe, Mercado Pago y transferencia activos, **When** una persona va a pagar, **Then** ve las tres opciones, elige una y cubre el total con esa sola. Si intenta completar el resto con otro medio, el sistema no lo permite.
+2. **Given** un evento, **When** el organizador deja solo un medio activo, **Then** la inscripción pública ofrece únicamente ese medio.
+3. **Given** ningún medio activo y un precio mayor a cero, **When** intenta publicar, **Then** el sistema no publica hasta que haya forma de pagar o el precio sea cero.
+4. **Given** la organización sin Stripe conectado, **When** intenta activarlo en un evento, **Then** se le indica que primero debe conectar Stripe en la configuración. Lo mismo aplica a Mercado Pago, de forma independiente.
+5. **Given** un medio nuevo agregado más adelante, **When** el organizador lo activa en un evento, **Then** aparece junto a los que ya estaban, sin reemplazarlos.
 
 ---
 
@@ -98,37 +101,38 @@ Con la función comercial correspondiente, el organizador genera un lote de cód
 
 ### Edge Cases
 
-- Un cupón que deja un saldo a pagar en efectivo el día del evento debe mostrarse como pendiente de efectivo y no como inscripción ya saldada, salvo que el organizador confirme ese pago.
+- Un cupón reduce el total, y ese total se paga con un solo medio. No parte el resto entre Stripe, Mercado Pago, transferencia o efectivo.
 - Quitar el cupón antes de pagar restaura el total original.
 - El límite de usos se reserva al confirmar el pago, no al teclear el código, para que un intento abandonado no agote el cupón.
 - Aprobar dos veces el mismo comprobante no confirma dos veces ni duplica el folio.
 - Los montos se muestran en pesos mexicanos, con el total que la persona va a pagar visible antes de confirmar.
-- El organizador conecta el cobro con tarjeta de la organización una sola vez y luego lo habilita por evento.
+- El organizador conecta Stripe y Mercado Pago una vez en la organización y después elige, en cada evento, cuáles de esos medios y la transferencia quedan visibles.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: La inscripción de precio mayor a cero MUST ofrecer al menos un medio de pago activo del evento antes de publicarse.
-- **FR-002**: El pago con tarjeta aprobado MUST confirmar la inscripción por el total aceptado en el resumen. Un pago fallido MUST NOT confirmarla.
+- **FR-002**: Un pago aprobado en Stripe o en Mercado Pago MUST confirmar la inscripción por el total aceptado en el resumen. Un pago fallido MUST NOT confirmarla.
 - **FR-003**: El sistema MUST impedir un segundo cobro de una inscripción ya pagada.
 - **FR-004**: La transferencia MUST dejar la inscripción pendiente hasta que un operador la apruebe o la rechace, y MUST notificar a la persona en ambos casos.
 - **FR-005**: El participante MUST poder adjuntar el comprobante y MUST ver las instrucciones de transferencia cuando ese medio está activo.
 - **FR-006**: Aprobar o rechazar el pago de un equipo MUST aplicar a todos sus integrantes, con confirmación previa al organizador.
-- **FR-007**: El organizador MUST poder activar o desactivar tarjeta y transferencia por evento.
+- **FR-007**: El sistema MUST ofrecer al menos Stripe, Mercado Pago y transferencia bancaria, y MUST permitir tener más de uno activo en el mismo evento. Cada inscripción o compra MUST pagarse por completo con un solo medio. El sistema MUST NOT combinar medios ni aceptar un pago parcial en uno y el resto en otro. Incorporar otro medio MUST NOT obligar a quitar los existentes.
 - **FR-008**: El sistema MUST mostrar el desglose de competencia, adicionales y descuento antes del pago, y MUST cobrar ese total.
 - **FR-009**: Un cupón MUST ser de porcentaje o monto fijo, MUST aplicar a inscripción, adicionales o ambos, y MUST consumirse por participante o por compra, según su configuración.
 - **FR-010**: El sistema MUST rechazar cupones vencidos, agotados, no aplicables a la competencia o con código inválido, e informar el motivo.
 - **FR-011**: Después del primer uso, el tipo y la modalidad del cupón MUST NOT cambiarse.
 - **FR-012**: Los lotes de cupones y su exportación MUST estar disponibles solo cuando la función comercial de lotes está habilitada.
 - **FR-013**: El organizador MUST poder consultar usos y ahorro de los cupones de su organización, filtrar por código, evento, competencia, estado y tipo, y administrarlos también desde el evento.
-- **FR-014**: La organización MUST poder conectar y desconectar la cuenta que recibe los pagos con tarjeta. Los fondos de esas ventas van a esa cuenta. Cada evento usa esa cuenta, salvo que la función de medios de pago por evento permita otra.
+- **FR-014**: La organización MUST poder conectar y desconectar Stripe y Mercado Pago por separado. Los fondos de cada uno van a la cuenta conectada de ese medio. Cada evento usa esas cuentas, salvo que la función de medios de pago por evento permita otra cuenta para ese evento.
 - **FR-015**: El organizador MUST poder ocultar al participante el cargo del procesador. El cargo por servicio propio, sumado por participante, solo está disponible con la función comercial correspondiente.
-- **FR-016**: Una competencia MUST poder dejar una parte del total para pago en efectivo el día del evento. Ese saldo no cuenta como inscripción saldada hasta que el equipo lo confirme.
+- **FR-016**: Si el efectivo el día del evento está disponible, MUST ser un medio exclusivo: cubre el total de esa inscripción y no se suma a Stripe, Mercado Pago ni a la transferencia. La inscripción no queda saldada hasta que el equipo confirme ese pago.
+- **FR-017**: La gestión de cupones MUST mostrar cuántos hay, cuántas veces se usaron y el ahorro acumulado. MUST filtrar por código o descripción, evento y estado (disponible, agotado o vencido) y, aparte, por competencia, tipo de descuento y concepto. Cada fila MUST mostrar código, descuento, dónde se usa, a qué aplica, usos, vencimiento y estado, y MUST permitir editar y eliminar. La exportación MUST permanecer bloqueada sin la función de lotes.
 
 ### Key Entities
 
-- **Pago**: Monto, medio (tarjeta o transferencia), estado (pendiente, aprobado, rechazado) e inscripción o compra a la que pertenece. El comprobante acompaña a la transferencia.
+- **Pago**: Monto total, un solo medio (Stripe, Mercado Pago, transferencia bancaria u otro medio habilitado) y estado (pendiente, aprobado, rechazado). Pertenece a una inscripción o a una compra. El comprobante acompaña a la transferencia. Una compra no tiene dos medios.
 - **Compra**: Una o más inscripciones pagadas juntas, con un total y, si aplica, un cupón.
 - **Cupón**: Código, beneficio, conceptos a los que aplica, modalidad, eventos y competencias, límite de usos, usos realizados y vencimiento.
 - **Lote de cupones**: Conjunto de códigos creados juntos con las mismas condiciones y límites independientes.
@@ -137,7 +141,7 @@ Con la función comercial correspondiente, el organizador genera un lote de cód
 
 ### Measurable Outcomes
 
-- **SC-001**: Una persona que paga con tarjeta aprobada ve su inscripción confirmada en menos de un minuto desde que autoriza el pago.
+- **SC-001**: Una persona que paga con Stripe o con Mercado Pago y recibe la aprobación ve su inscripción confirmada en menos de un minuto desde que autoriza el pago.
 - **SC-002**: El monto cobrado coincide con el total mostrado en el resumen en el 100% de las compras de prueba, incluidos descuentos y adicionales.
 - **SC-003**: Ningún comprobante rechazado de la prueba deja la inscripción confirmada ni permite entrega de kit.
 - **SC-004**: Un cupón con límite de un uso, aplicado en dos compras simultáneas, confirma el descuento en una sola de ellas.
@@ -145,9 +149,9 @@ Con la función comercial correspondiente, el organizador genera un lote de cód
 
 ## Assumptions
 
-- "Tarjeta" es un cobro en línea con confirmación inmediata. El proveedor concreto se elige en el plan técnico. La organización conecta ese cobro una vez en su configuración.
+- Stripe y Mercado Pago son medios de cobro en línea con confirmación inmediata. La organización conecta cada uno por su cuenta. La transferencia bancaria es un tercer medio, manual. Otros medios pueden sumarse sin sustituir a estos tres.
 - La transferencia es manual: la persona paga fuera de la plataforma y el equipo verifica el comprobante. No hay conciliación bancaria automática en esta spec.
 - La moneda es el peso mexicano.
 - Un precio cero confirma la inscripción sin pago, si el organizador publicó la competencia así.
 - Depende de `003-eventos-inscripcion` para la inscripción y de `001-acceso-organizacion` para quién puede aprobar pagos (propietaria, administrador o staff operador y administrador de evento).
-- El saldo "pendiente en efectivo" existe como estado visible, y la confirmación de ese efectivo la hace el equipo. No es un tercer medio de cobro en línea.
+- El efectivo del día del evento, si el organizador lo ofrece, es un medio más y excluye a los demás en esa inscripción. La confirmación la hace el equipo. No completa un pago empezado con Stripe, Mercado Pago o transferencia.

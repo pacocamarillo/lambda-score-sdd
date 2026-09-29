@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lambda_score
+    ports:
+      - "5432:5432"
+    volumes:
+      - lambda_score_pg:/var/lib/postgresql/data
+
+volumes:
+  lambda_score_pg:

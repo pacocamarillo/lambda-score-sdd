@@ -31,5 +31,5 @@
 
 ## Notes
 
-- Revisión del 2026-09-28: los ítems pasan. Check-in, kit y resultados importados son P2. Fotos, categorías y código de cronometraje son P3.
-- Lista para `/speckit-clarify` o `/speckit-plan`.
+- Revisión del 2026-09-29: los ítems pasan. La tabla pública incluye lugar, diferencia, vistas de ganadores y top 3, descarga y certificado imprimible, sin fijar tecnología.
+- Lista para `/speckit-plan`.

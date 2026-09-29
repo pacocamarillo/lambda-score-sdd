@@ -109,12 +109,13 @@ Al invitar o editar a alguien de staff, la propietaria define si no tiene evento
 4. **Given** staff administrador de un evento, **When** abre ese evento, **Then** configura y opera ese evento, y sigue sin acceso a facturación de la plataforma, configuración de la organización, sitio web ni analítica.
 5. **Given** un administrador o la propietaria, **When** consultan permisos, **Then** tienen acceso general a todos los eventos. Solo la propietaria guarda cambios de miembros.
 6. **Given** la propietaria explorando el formulario de staff sin la función de roles avanzados habilitada, **When** intenta guardar un staff, **Then** puede ver las opciones y el sistema rechaza el guardado hasta habilitar esa función.
+7. **Given** la propietaria en la configuración del equipo, **When** consulta roles, **Then** ve la tabla de roles, permisos y accesos, y un intento fuera de esa tabla es rechazado.
 
 ---
 
 ### User Story 7 - Actualizar la propia contraseña (Priority: P3)
 
-Dentro del panel, la persona cambia su contraseña indicando la actual y la nueva dos veces. El nombre y el correo se muestran y no se editan ahí.
+Dentro del panel, la persona actualiza su nombre y, por separado, su contraseña indicando la actual y la nueva dos veces. El correo se muestra y no se edita ahí.
 
 **Why this priority**: Mejora la cuenta ya creada; el restablecimiento por correo cubre el caso urgente.
 
@@ -123,7 +124,25 @@ Dentro del panel, la persona cambia su contraseña indicando la actual y la nuev
 **Acceptance Scenarios**:
 
 1. **Given** la contraseña actual correcta y una nueva válida repetida, **When** guarda, **Then** la siguiente entrada exige la nueva contraseña.
-2. **Given** el perfil, **When** intenta cambiar nombre o correo, **Then** esos campos no se pueden editar.
+2. **Given** el perfil, **When** cambia el nombre y lo guarda, **Then** el panel muestra el nombre nuevo y el correo sigue sin poder editarse.
+3. **Given** el perfil, **When** guarda la contraseña sin tocar el nombre, **Then** solo cambia la contraseña.
+
+---
+
+### User Story 8 - Verificación en dos pasos opcional (Priority: P3)
+
+Desde el perfil, la persona puede activar TOTP (app de autenticación). Tras confirmar con un código, recibe códigos de respaldo de un solo uso. Si está activa, entrar con contraseña exige un segundo paso; el enlace mágico por correo no lo exige. Puede desactivarla con contraseña y un código válido.
+
+**Why this priority**: Refuerza cuentas con acceso sensible sin bloquear el camino del enlace mágico.
+
+**Independent Test**: Activar 2FA, cerrar sesión, entrar con contraseña y completar el código; desactivar desde el perfil.
+
+**Acceptance Scenarios**:
+
+1. **Given** una cuenta sin 2FA, **When** inicia la configuración y confirma con un código TOTP válido, **Then** la cuenta queda protegida y se muestran códigos de respaldo una sola vez.
+2. **Given** 2FA activa, **When** entra con contraseña correcta, **Then** debe introducir un código TOTP o de respaldo antes de abrir el panel.
+3. **Given** 2FA activa, **When** entra con enlace mágico vigente, **Then** entra sin segundo paso.
+4. **Given** 2FA activa, **When** desactiva desde el perfil con contraseña y código correctos, **Then** el siguiente acceso con contraseña no pide segundo paso.
 
 ---
 
@@ -152,15 +171,43 @@ Dentro del panel, la persona cambia su contraseña indicando la actual y la nuev
 - **FR-011**: En cada evento asignado a staff, el permiso MUST ser uno de: solo lectura, operador o administrador de evento.
 - **FR-012**: Los permisos por evento MUST aplicarse solo a staff. Propietaria y administrador conservan acceso general a los eventos de su organización.
 - **FR-013**: El sistema MUST impedir guardar un usuario staff cuando la función de roles avanzados no está habilitada para la organización.
-- **FR-014**: Desde el perfil, la persona MUST poder cambiar su contraseña y MUST NOT poder cambiar ahí su nombre ni su correo.
+- **FR-014**: Desde el perfil, la persona MUST poder actualizar su nombre y, en un formulario aparte, su contraseña. El correo MUST mostrarse y MUST NOT poder cambiarse ahí.
+- **FR-020**: La configuración de la organización MUST reunir, para la propietaria, los detalles, el equipo, la medición externa y la conexión de los medios de cobro. Los detalles MUST incluir nombre, descripción y logo, y MUST dejar en solo lectura el subdominio, el país y la moneda. El dominio propio y la medición externa MUST permanecer bloqueados mientras su función de pago no esté habilitada. La propietaria MUST poder reemplazar y eliminar el logo cuando el guardado de archivos esté disponible. El panel MUST avisar que un cambio público puede tardar hasta 5 minutos.
 - **FR-015**: El sistema MUST invalidar enlaces de acceso, restablecimiento e invitación ya usados, vencidos o revocados.
 - **FR-016**: Una organización MUST poder tener más de una propietaria. El equipo se administra dentro de la configuración de la organización, con nombre, correo, rol y estado.
 - **FR-017**: Después de crear la organización, el subdominio, el país y la moneda MUST NOT poder cambiarse.
 - **FR-018**: El dominio propio de la organización es una función de pago. Mientras no esté habilitada, el sitio sigue en el subdominio de la plataforma.
+- **FR-019**: El sistema MUST generar y mostrar a la propietaria la tabla de roles, permisos y accesos de esta spec. MUST aplicar esa tabla en el panel, el sitio, el portal y la consola interna. Una función de pago apagada MUST ocultar su acceso aunque el rol lo tendría.
+- **FR-021**: El sistema MUST permitir activar verificación en dos pasos TOTP opcional desde el perfil, con códigos de respaldo de un solo uso. MUST exigir segundo paso tras contraseña válida cuando esté activa. MUST NOT exigir segundo paso en el acceso por enlace mágico. MUST permitir desactivarla con contraseña actual y un código TOTP o de respaldo válido. El secreto TOTP MUST almacenarse cifrado; los códigos de respaldo MUST almacenarse solo como hash.
+
+### Tabla de roles, permisos y accesos
+
+El staff solo alcanza las filas de evento en los eventos que tiene asignados. Sin eventos asignados, no ve datos de eventos. Comunicaciones, analítica y el resto de funciones de pago siguen apagadas hasta habilitarse, también para propietaria y administrador.
+
+| Acceso | Visita | Participante | Propietaria | Administrador | Staff solo lectura | Staff operador | Staff admin. de evento | Operador interno |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Sitio público, ficha del evento, inscripción y resultados publicados | Sí | Sí | Sí | Sí | Sí | Sí | Sí | Sí |
+| Portal: sus propias inscripciones y confirmación | No | Sí | No | No | No | No | No | No |
+| Inicio del panel, eventos y participantes del evento | No | No | Sí | Sí | Consulta | Sí | Sí | No |
+| Alta, edición y borrado de inscripciones | No | No | Sí | Sí | No | Sí | Sí | No |
+| Check-in, entrega de kit y verificación de pagos | No | No | Sí | Sí | No | Sí | Sí | No |
+| Configurar el evento, competencias, formulario y medios de pago | No | No | Sí | Sí | No | No | Sí | No |
+| Resultados, fotos y código de cronometraje del evento | No | No | Sí | Sí | Consulta | Consulta | Sí | No |
+| Cupones de la organización | No | No | Sí | Sí | No | No | No | No |
+| Sitio web de la organización | No | No | Sí | Sí | No | No | No | No |
+| Contactos de la organización | No | No | Sí | Sí | No | No | No | No |
+| Comunicaciones y analítica | No | No | Sí, si la función está activa | Sí, si la función está activa | No | No | No | No |
+| Facturación de la plataforma y medio de pago de esa factura | No | No | Sí | No | No | No | No | Sí, en la consola |
+| Configuración de la organización y dominio | No | No | Sí | No | No | No | No | No |
+| Invitar, editar y eliminar miembros | No | No | Sí | No | No | No | No | No |
+| Perfil: cambiar su nombre, contraseña y 2FA opcional | No | Sí | Sí | Sí | Sí | Sí | Sí | Sí |
+| Consola interna: organizaciones, facturas, funciones y reasignar folios | No | No | No | No | No | No | No | Sí |
+
+La visita no tiene sesión. El participante solo ve inscripciones cuyo correo es el de su cuenta. El operador interno no entra al panel de una organización cliente por ser operador.
 
 ### Key Entities
 
-- **Usuario**: Persona con correo único en la plataforma, nombre y credencial de acceso. El correo es el identificador de entrada.
+- **Usuario**: Persona con correo único en la plataforma, nombre y credencial de acceso. El correo es el identificador de entrada. Puede tener TOTP opcional (secreto cifrado, fecha de activación) y códigos de respaldo asociados.
 - **Organización**: Organizador con nombre y subdominio único. Es el límite de visibilidad de eventos, sitio, equipo y participantes.
 - **Membresía**: Vínculo de un usuario con una organización y un rol (propietaria, administrador o staff).
 - **Invitación**: Correo, rol y asignación de eventos pendientes de aceptación. Se puede revocar antes de aceptarse.
@@ -175,6 +222,8 @@ Dentro del panel, la persona cambia su contraseña indicando la actual y la nuev
 - **SC-003**: En una prueba con dos organizaciones, ninguna persona ve datos de la organización a la que no pertenece.
 - **SC-004**: Un staff de solo lectura, en una revisión de cinco tareas prohibidas (editar evento, invitar usuarios, abrir facturación, abrir otro evento, entregar kit), no completa ninguna.
 - **SC-005**: Los enlaces de un solo uso dejan de otorgar acceso después de su primer uso exitoso o de su revocación, en el 100% de los casos probados.
+- **SC-006**: En una revisión de la tabla de roles, permisos y accesos, cada celda marcada como no se rechaza al intentar ese acceso, y cada celda marcada como sí se abre para ese rol.
+- **SC-007**: Con 2FA activa, el 100% de los intentos de acceso al panel solo con contraseña correcta se detienen hasta un código TOTP o de respaldo válido.
 
 ## Assumptions
 
@@ -182,6 +231,7 @@ Dentro del panel, la persona cambia su contraseña indicando la actual y la nuev
 - Una persona puede pertenecer a más de una organización; al entrar elige, o se le lleva a la última organización usada si solo tiene una membresía activa.
 - El enlace mágico y el de restablecimiento caducan a las 24 horas.
 - "Roles avanzados" es una función comercial de la organización. En la ola 1 la propietaria opera sola; el staff con permisos por evento llega en la ola 2, cuando esa función esté habilitada.
-- No se exige inicio de sesión social ni verificación en dos pasos en esta spec.
+- No se exige inicio de sesión social. La verificación en dos pasos TOTP es opcional por cuenta; el enlace mágico no la combina con contraseña en el mismo flujo.
 - El nombre comercial del producto no forma parte de esta spec. Cada organización muestra su propio nombre en el acceso.
 - El menú del panel ofrece inicio, contactos, eventos, cupones, sitio, comunicaciones, analítica, facturación, configuración y perfil. Comunicaciones y analítica se marcan como función de pago cuando no están incluidas.
+- La tabla de roles, permisos y accesos es la referencia única. El portal del participante está en `006-portal-participante` y la consola interna en `008-facturacion-plataforma`; no definen otros accesos distintos.

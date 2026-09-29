@@ -31,5 +31,6 @@
 
 ## Notes
 
-- Revisión del 2026-09-28: los ítems pasan. Los roles de staff quedan en P2 y dependen de la función comercial "roles avanzados", documentada en Assumptions.
-- Lista para `/speckit-clarify` o `/speckit-plan`.
+- Revisión del 2026-09-29: los ítems pasan. La spec incluye la tabla de roles, permisos y accesos, y exige mostrarla a la propietaria. No fija tecnología.
+- Revisión del 2026-09-29, panel: el perfil separa nombre y contraseña, y el correo queda bloqueado. La configuración reúne detalles, equipo, medición y medios de cobro. Los contactos quedan aparte de comunicaciones y analítica.
+- Lista para implementar a partir de `tasks.md`.

@@ -32,4 +32,5 @@
 ## Notes
 
 - Revisión del 2026-09-28: los ítems pasan. Noticias, menú y páginas quedan en P2; el inicio y el listado son P1.
+- Revisión del 2026-09-29: el editor del panel queda en una pantalla, con inicio, noticias, colores, portada, patrocinadores y contacto.
 - Lista para `/speckit-clarify` o `/speckit-plan`.

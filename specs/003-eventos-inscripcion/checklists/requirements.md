@@ -32,4 +32,5 @@
 ## Notes
 
 - Revisión del 2026-09-28: los ítems pasan. Equipos y folios son P2; adicionales y página enriquecida del evento son P3.
+- Revisión del 2026-09-29: el listado filtra por nombre, estado y fechas, y muestra lugar, fecha, estado e inscripciones.
 - Lista para `/speckit-clarify` o `/speckit-plan`.

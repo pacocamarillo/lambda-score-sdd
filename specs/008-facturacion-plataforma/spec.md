@@ -100,6 +100,7 @@ El equipo interno habilita para una organización las funciones de pago: analít
 - **FR-009**: El equipo interno MUST poder habilitar o deshabilitar funciones comerciales por organización, de forma independiente del plan que las incluye.
 - **FR-010**: El equipo interno MUST poder reasignar los folios de una competencia en el orden de creación de las inscripciones, con confirmación explícita y sin alterar otras competencias.
 - **FR-011**: Las inscripciones sin pago aprobado MUST NOT contar para la factura del organizador.
+- **FR-012**: La facturación de la propietaria MUST indicar si el débito automático está activo, el periodo en curso (inscripciones, desde qué fecha, precio, total estimado y si sigue pendiente) y el historial con periodo, inscripciones, monto, estado y fecha de pago. MUST ofrecer los datos fiscales y el medio de pago, con el aviso de que un cambio aplica a la factura siguiente. Sin movimientos, cada bloque MUST decir que todavía no hay registros.
 
 ### Key Entities
 

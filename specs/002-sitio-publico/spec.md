@@ -117,6 +117,7 @@ El equipo define el menú con enlaces del sistema (eventos, noticias, patrocinad
 - **FR-008**: Las páginas MUST componerse de bloques reordenables y activables: párrafo, título, lista, imagen, enlaces, llamado a la acción y separador.
 - **FR-009**: El sistema MUST avisar que los cambios del sitio público pueden tardar hasta 5 minutos en reflejarse.
 - **FR-010**: El pie MUST mostrar el contacto configurado y el crédito de que el sitio opera sobre la plataforma, sin imponer la marca de otra organización.
+- **FR-011**: El editor del sitio MUST caber en una sola pantalla, con el aviso de hasta 5 minutos y un interruptor para habilitar el inicio. MUST ofrecer la pestaña de inicio y la de noticias. El inicio MUST mostrar colores de marca (primario, secundario, acento, éxito y advertencia), la portada activable con imagen, título y descripción, los patrocinadores con logo, nombre y dirección, las redes, el teléfono, el correo y el icono de mensajería. Las noticias MUST listar artículo, fecha, estado y si aparecen en el inicio, con búsqueda, filtro de estado, rango de fechas, alta, edición y eliminación.
 
 ### Key Entities
 
