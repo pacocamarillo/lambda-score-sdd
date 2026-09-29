@@ -146,7 +146,13 @@ El organizador configura la página pública del evento: patrocinadores y mapa o
 - **FR-006**: El sistema MUST impedir publicar un evento sin los datos mínimos y sin al menos una competencia guardada.
 - **FR-007**: Las competencias de equipo MUST exigir el mínimo de integrantes y el nombre del equipo cuando así se configure. El precio MUST poder definirse por participante o por equipo.
 - **FR-008**: El organizador MUST poder agregar campos propios al formulario y marcarlos obligatorios.
-- **FR-009**: El sistema MUST poder asignar un folio único por competencia cuando el pago queda aprobado, si el organizador activó la asignación automática.
+- **FR-009**: Si la asignación automática está activa, el sistema MUST asignar un folio al aprobarse el pago. El organizador elige si la secuencia es única para todo el evento o independiente por competencia, con número inicial y prefijo. El folio MUST ser único dentro de ese alcance. El organizador MUST poder decidir si el folio aparece en la confirmación.
+- **FR-014**: Publicar el evento y abrir la inscripción son acciones distintas. Un evento publicado con la inscripción cerrada MUST seguir visible y MUST NOT aceptar registros nuevos.
+- **FR-015**: El organizador MUST poder marcar el evento como gratuito. En ese caso la inscripción se confirma sin pago.
+- **FR-016**: El formulario base MUST pedir nombre, apellido, fecha de nacimiento, número de documento y correo. El documento MUST ofrecer al menos identificación oficial, clave de registro de población, registro fiscal u otro.
+- **FR-017**: Un campo propio MUST poder ser texto, número, lista, opción única, texto largo, archivo o separador. MUST poder ser obligatorio, de valor único en el evento, y aplicar a todas las competencias o solo a algunas.
+- **FR-018**: Una competencia MUST poder guardar hora de inicio, cupo, precio, artículos incluidos, color de folio y la opción de pago parcial en efectivo el día del evento.
+- **FR-019**: El editor del evento MUST mostrar un resumen con fecha, cierre de inscripción, si la inscripción está abierta y el medio de pago en uso. Desde el listado, cada evento MUST permitir editar, ver participantes, abrir su página, ver estadísticas, abrir resultados y fotos, y cronometrar.
 - **FR-010**: El organizador MUST poder ofrecer adicionales con opciones, precio, stock, carácter obligatorio y visibilidad para inscripciones nuevas, limitados a todas o a algunas competencias.
 - **FR-011**: Ocultar o editar un adicional que ya fue elegido MUST NOT borrar el historial de quienes ya lo tienen.
 - **FR-012**: La página pública del evento MUST mostrar la información publicada, las competencias disponibles y el camino a la inscripción mientras esta siga abierta.
@@ -174,7 +180,9 @@ El organizador configura la página pública del evento: patrocinadores y mapa o
 ## Assumptions
 
 - El cobro en sí está especificado en `004-pagos-cupones`. Esta spec deja la inscripción en espera de ese resultado.
-- Los datos mínimos del participante son nombre, correo y la aceptación de términos y renuncia. Fecha de nacimiento, sexo, teléfono y contacto de emergencia pueden activarse como campos del formulario.
+- Los datos base de la inscripción son nombre, apellido, fecha de nacimiento, documento y correo, más la aceptación configurada por el organizador. El evento puede mostrar un aviso en HTML durante el registro.
+- La imagen principal y la miniatura del evento aceptan PNG, JPG o GIF de hasta 3 MB. La miniatura es opcional.
+- Un evento privado, cuando la función está habilitada, exige un código de acceso para inscribirse.
 - El folio se muestra al participante como número de competidor. No se reutiliza aunque una inscripción se cancele, salvo una acción explícita de reasignación que queda en la operación interna de `008-facturacion-plataforma`.
 - Los eventos privados y el cargo por servicio al participante son funciones comerciales posteriores y no forman parte de la ola 1.
 - La zona horaria de fechas visibles es la de México.

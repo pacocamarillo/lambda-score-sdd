@@ -154,6 +154,9 @@ Dentro del panel, la persona cambia su contraseña indicando la actual y la nuev
 - **FR-013**: El sistema MUST impedir guardar un usuario staff cuando la función de roles avanzados no está habilitada para la organización.
 - **FR-014**: Desde el perfil, la persona MUST poder cambiar su contraseña y MUST NOT poder cambiar ahí su nombre ni su correo.
 - **FR-015**: El sistema MUST invalidar enlaces de acceso, restablecimiento e invitación ya usados, vencidos o revocados.
+- **FR-016**: Una organización MUST poder tener más de una propietaria. El equipo se administra dentro de la configuración de la organización, con nombre, correo, rol y estado.
+- **FR-017**: Después de crear la organización, el subdominio, el país y la moneda MUST NOT poder cambiarse.
+- **FR-018**: El dominio propio de la organización es una función de pago. Mientras no esté habilitada, el sitio sigue en el subdominio de la plataforma.
 
 ### Key Entities
 
@@ -181,3 +184,4 @@ Dentro del panel, la persona cambia su contraseña indicando la actual y la nuev
 - "Roles avanzados" es una función comercial de la organización. En la ola 1 la propietaria opera sola; el staff con permisos por evento llega en la ola 2, cuando esa función esté habilitada.
 - No se exige inicio de sesión social ni verificación en dos pasos en esta spec.
 - El nombre comercial del producto no forma parte de esta spec. Cada organización muestra su propio nombre en el acceso.
+- El menú del panel ofrece inicio, contactos, eventos, cupones, sitio, comunicaciones, analítica, facturación, configuración y perfil. Comunicaciones y analítica se marcan como función de pago cuando no están incluidas.

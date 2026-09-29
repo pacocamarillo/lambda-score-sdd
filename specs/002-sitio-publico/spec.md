@@ -138,6 +138,8 @@ El equipo define el menú con enlaces del sistema (eventos, noticias, patrocinad
 
 - Depende de `001-acceso-organizacion` para saber quién puede editar el sitio, y de `003-eventos-inscripcion` para el contenido de eventos y el destino de "inscribirse".
 - El menú inicial, si el equipo no lo personaliza, ofrece eventos, noticias, patrocinadores y contacto.
+- En el panel, el sitio se edita desde una sola pantalla. Lo mínimo visible es la página de inicio y las noticias. El menú y las páginas propias aparecen cuando esa capacidad está habilitada.
+- El dominio propio se configura en la organización y queda descrito en `001-acceso-organizacion`.
 - Las redes contempladas al inicio son las que la organización cargue como direcciones públicas; no es obligatorio tener las cuatro.
 - El editor de páginas es para contenido informativo. No reemplaza la ficha del evento ni el formulario de inscripción.
 - No se incluye tienda en línea ni blog con comentarios en esta spec.

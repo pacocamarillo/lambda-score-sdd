@@ -121,7 +121,10 @@ Con la función comercial correspondiente, el organizador genera un lote de cód
 - **FR-010**: El sistema MUST rechazar cupones vencidos, agotados, no aplicables a la competencia o con código inválido, e informar el motivo.
 - **FR-011**: Después del primer uso, el tipo y la modalidad del cupón MUST NOT cambiarse.
 - **FR-012**: Los lotes de cupones y su exportación MUST estar disponibles solo cuando la función comercial de lotes está habilitada.
-- **FR-013**: El organizador MUST poder consultar usos y ahorro de los cupones de su organización.
+- **FR-013**: El organizador MUST poder consultar usos y ahorro de los cupones de su organización, filtrar por código, evento, competencia, estado y tipo, y administrarlos también desde el evento.
+- **FR-014**: La organización MUST poder conectar y desconectar la cuenta que recibe los pagos con tarjeta. Los fondos de esas ventas van a esa cuenta. Cada evento usa esa cuenta, salvo que la función de medios de pago por evento permita otra.
+- **FR-015**: El organizador MUST poder ocultar al participante el cargo del procesador. El cargo por servicio propio, sumado por participante, solo está disponible con la función comercial correspondiente.
+- **FR-016**: Una competencia MUST poder dejar una parte del total para pago en efectivo el día del evento. Ese saldo no cuenta como inscripción saldada hasta que el equipo lo confirme.
 
 ### Key Entities
 

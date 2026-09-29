@@ -89,8 +89,8 @@ El equipo sube fotos del evento y pide procesarlas. La visita filtra la galería
 
 1. **Given** archivos de imagen dentro del tamaño permitido, **When** el equipo los sube, **Then** quedan en el evento pendientes de publicarse.
 2. **Given** fotos listas, **When** el equipo confirma el procesamiento, **Then** el sistema avisa que puede tardar hasta 24 horas y que no se puede repetir.
-3. **Given** una galería publicada, **When** una visita busca un folio, **Then** ve solo las fotos de ese folio y puede descargarlas.
-4. **Given** la función de fotos no habilitada para la organización, **When** el equipo intenta usarla, **Then** ve que es una función de pago y no procesa imágenes.
+3. **Given** una galería publicada, **When** una visita la abre, **Then** ve miniaturas y descarga el original solo de la foto que elige. Si busca un folio, ve únicamente las fotos ya asociadas a ese número.
+4. **Given** el paquete de procesamiento apagado, **When** el equipo sube fotos de un evento con menos de 50 participantes, **Then** la galería de miniaturas acepta los archivos y el procesamiento automático permanece cerrado.
 
 ---
 
@@ -117,23 +117,26 @@ El organizador genera un código de un solo evento para el staff de cronometraje
 - La búsqueda por folio no muestra participantes de otro evento u otra organización.
 - Un archivo de resultados vacío o de otra competencia no publica tiempos.
 - El escáner de folio y el trabajo sin conexión son funciones de pago: si no están habilitadas, el equipo ve el aviso y sigue pudiendo buscar y editar en línea.
-- Las fotos se aceptan como imagen y con un máximo de 15 MB por archivo. Un archivo que no cumple se rechaza con el motivo.
+- Las fotos se aceptan como JPG o PNG de hasta 15 MB. Un archivo que no cumple se rechaza con el motivo. Al llegar a 5.000 fotos o 25 GB, el evento no admite más archivos.
+- El lector de folio con cámara, la búsqueda rápida y el trabajo sin conexión son funciones de pago. La búsqueda escrita sigue disponible.
+- Desde la lista de participantes el equipo puede iniciar una comunicación a esa audiencia. El envío en sí está en `007-comunicaciones-analitica`.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: El equipo autorizado MUST poder listar, buscar, crear, editar y eliminar inscripciones del evento, respetando el permiso de solo lectura.
-- **FR-002**: La búsqueda MUST cubrir nombre y folio, y MUST limitarse al evento actual.
+- **FR-002**: La búsqueda MUST cubrir nombre, correo, documento y folio, y MUST limitarse al evento actual. El equipo MUST poder filtrar por entrega de kit, por origen de alta (manual o en línea) y por cupón, exportar la lista y pasar de la vista general a la vista por competencia.
 - **FR-003**: El sistema MUST rechazar folios duplicados dentro de la misma competencia.
 - **FR-004**: El operador MUST poder registrar check-in y entrega de kit solo si el pago está aprobado.
 - **FR-005**: El equipo MUST poder importar resultados por folio y tiempo para una competencia, con vista previa y lista de folios sin coincidencia.
-- **FR-006**: Los resultados publicados MUST ser consultables sin sesión de equipo, mostrando folio y tiempo de las competencias publicadas.
+- **FR-006**: Los resultados MUST permanecer ocultos al público hasta que el equipo los publique. Una vez publicados, MUST mostrar folio y tiempo. El organizador MUST poder sustituir esa tabla por un enlace externo mostrado en la página, o abrir las fotos en un enlace externo.
 - **FR-007**: El equipo MUST poder agrupar resultados por un campo del formulario y MUST poder unir dos o más competencias en una tabla pública titulada.
-- **FR-008**: El equipo MUST poder subir fotos del evento y solicitar un procesamiento único, con aviso de espera de hasta 24 horas.
-- **FR-009**: Una visita MUST poder filtrar las fotos publicadas por folio y descargar las coincidencias.
+- **FR-008**: El equipo MUST poder subir fotos del evento. Cada archivo MUST ser JPG o PNG de hasta 15 MB. El evento acepta hasta 5.000 fotos o 25 GB, lo que se alcance primero.
+- **FR-009**: La visita MUST poder recorrer la galería por miniaturas y descargar el original de una foto. Filtrar por folio es opcional y solo muestra coincidencias ya asociadas. La clasificación automática no es obligatoria.
+- **FR-013**: Subir fotos con el paquete de procesamiento MUST exigir al menos 50 participantes activos y MUST permitir un solo procesamiento, con aviso de espera de hasta 24 horas. Sin ese paquete, la galería de miniaturas sigue disponible y no exige ese mínimo.
 - **FR-010**: El organizador MUST poder emitir y revocar un código de cronometraje de un evento para que el staff consulte participantes y cargue tiempos.
-- **FR-011**: Fotos, escáner de folio y operación sin conexión MUST requerir la función comercial correspondiente. Sin ella, el listado en línea sigue disponible.
+- **FR-011**: El escáner de folio y la operación sin conexión MUST requerir la función comercial correspondiente. Sin ella, el listado en línea sigue disponible. El procesamiento de fotos es otra función de pago; la galería de miniaturas no depende de ella.
 - **FR-012**: Las acciones de esta spec MUST respetar el aislamiento por organización y los permisos de `001-acceso-organizacion`.
 
 ### Key Entities
@@ -161,3 +164,4 @@ El organizador genera un código de un solo evento para el staff de cronometraje
 - Asociar una foto a un folio puede hacerse durante el procesamiento. El detalle de reconocimiento automático se decide en el plan; la spec exige que la visita busque por folio y solo vea coincidencias publicadas.
 - Los nombres públicos de resultados muestran el nombre del participante. Quien necesite ocultar nombres deberá quedar para una spec posterior; no se promete anonimato en esta versión.
 - La reasignación masiva de folios de toda una competencia es una herramienta interna y se especifica en `008-facturacion-plataforma`, no aquí.
+- La galería de menor costo muestra miniaturas y entrega el original al descargar. Asociar fotos a un folio puede hacerse a mano o con el paquete de procesamiento. Ese paquete pide al menos 50 participantes activos, admite hasta 5.000 fotos o 25 GB por evento y se ejecuta una sola vez.

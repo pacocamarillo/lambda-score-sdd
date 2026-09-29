@@ -12,7 +12,7 @@
 
 ### User Story 1 - Ver el resumen del panel (Priority: P2)
 
-Al entrar al panel, el organizador ve eventos activos, inscripciones, ingresos y visitas recientes, y accesos para ir a eventos, sitio o configuración.
+Al entrar al panel, el organizador ve los eventos recientes con fecha, cantidad de inscripciones y estado, y accesos para crear un evento, abrir el sitio o la configuración. Las visitas y los ingresos detallados están en analítica, no en este inicio.
 
 **Why this priority**: Orienta el trabajo diario. No es necesario para publicar el primer evento, por eso no es P1 de la ola 1.
 
@@ -20,7 +20,7 @@ Al entrar al panel, el organizador ve eventos activos, inscripciones, ingresos y
 
 **Acceptance Scenarios**:
 
-1. **Given** eventos e inscripciones de la organización, **When** la propietaria abre el panel, **Then** ve totales de eventos activos, inscripciones e ingresos, y una lista de eventos recientes.
+1. **Given** eventos de la organización, **When** la propietaria abre el panel, **Then** ve los más recientes con sus inscripciones y su estado, y puede abrir la lista de participantes de cada uno.
 2. **Given** un staff sin acceso a analítica, **When** abre el panel, **Then** no ve métricas de visitas de toda la organización.
 3. **Given** un evento reciente, **When** elige ver inscritos, **Then** llega a la lista de ese evento.
 
@@ -106,9 +106,9 @@ La organización configura identificadores de medición de visitas y de conversi
 
 ### Functional Requirements
 
-- **FR-001**: El panel de la propietaria y del administrador MUST mostrar eventos activos, inscripciones, ingresos y eventos recientes de su organización.
+- **FR-001**: El inicio del panel MUST mostrar eventos recientes, con fecha, inscripciones y estado, más accesos a crear evento, sitio y configuración. MUST mostrar qué funciones de pago faltan por habilitar, sin tratarlas como métricas.
 - **FR-002**: La analítica detallada MUST estar disponible solo con la función comercial habilitada, para 7, 30 o 90 días, con filtro opcional por evento.
-- **FR-003**: La analítica MUST separar vistas, visitantes, visitas a la inscripción, inscripciones completadas, participantes, y el recorrido de fotos (vista, búsqueda, descarga).
+- **FR-003**: La analítica MUST separar vistas, visitantes, descargas y búsquedas de fotos, una tendencia diaria, el recorrido de visita a evento a inscripción completada, y un desglose por tipo de página y por evento.
 - **FR-004**: Las campañas MUST poder dirigirse a contactos elegidos o a inscritos de un evento, con filtro opcional de una competencia.
 - **FR-005**: El equipo MUST poder previsualizar y enviar una prueba antes del envío masivo.
 - **FR-006**: El sistema MUST omitir destinatarios sin los datos que la campaña exige, e MUST informar el motivo, incluyendo folio ausente o correo inválido.
