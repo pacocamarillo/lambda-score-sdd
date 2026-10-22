@@ -11,12 +11,23 @@ import type { ActionResult, DocumentType, ParticipantGender, ParticipantInput } 
 
 const DOCUMENT_TYPES: DocumentType[] = ["ine", "curp", "rfc", "other"];
 
-export function parseParticipant(raw: ParticipantInput): ActionResult<ParticipantInput> {
+type ParsedParticipant = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  gender: ParticipantGender;
+  documentType: DocumentType;
+  documentNumber: string;
+  answers: Record<string, unknown>;
+};
+
+export function parseParticipant(raw: ParticipantInput): ActionResult<ParsedParticipant> {
   const email = raw.email.trim().toLowerCase();
   const firstName = raw.firstName.trim();
   const lastName = raw.lastName.trim();
   const documentNumber = (raw.documentNumber ?? "").trim();
-  const documentType =
+  const documentType: DocumentType =
     raw.documentType && DOCUMENT_TYPES.includes(raw.documentType) ? raw.documentType : "other";
   const birthDate = raw.birthDate;
   const gender = parseGender(raw.gender) as ParticipantGender | null;
