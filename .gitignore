@@ -17,4 +17,5 @@ Thumbs.db
 *.tmp
 *.swp
 .vercel
-drizzle/meta/
+drizzle/meta/*
+!drizzle/meta/_journal.json

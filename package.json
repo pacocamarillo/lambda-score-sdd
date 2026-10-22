@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "tsx scripts/migrate.ts && next build",
     "start": "next start",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "tsx scripts/migrate.ts",
     "db:seed-admins": "tsx scripts/seed-admins.ts",
     "test": "vitest run",
     "test:e2e": "playwright test"
