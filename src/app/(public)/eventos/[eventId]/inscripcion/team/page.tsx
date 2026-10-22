@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { listCompetitionsWithAvailability } from "@/modules/events/competitions";
 import { getPublicEvent, registrationIsOpen } from "@/modules/events/crud";
 import { registerTeam } from "@/modules/events/teams";
-import type { DocumentType, ParticipantInput } from "@/modules/events/types";
+import type { ParticipantGender, ParticipantInput } from "@/modules/events/types";
 
 function memberFromForm(formData: FormData, index: number): ParticipantInput {
   return {
@@ -11,8 +11,9 @@ function memberFromForm(formData: FormData, index: number): ParticipantInput {
     firstName: String(formData.get(`firstName_${index}`) ?? ""),
     lastName: String(formData.get(`lastName_${index}`) ?? ""),
     birthDate: String(formData.get(`birthDate_${index}`) ?? ""),
-    documentType: String(formData.get(`documentType_${index}`) ?? "ine") as DocumentType,
-    documentNumber: String(formData.get(`documentNumber_${index}`) ?? ""),
+    gender: String(formData.get(`gender_${index}`) ?? "") as ParticipantGender,
+    documentType: "other",
+    documentNumber: "",
   };
 }
 
@@ -126,21 +127,18 @@ export default async function TeamInscripcionPage({
                 <input name={`lastName_${index}`} required />
               </label>
               <label>
-                Fecha de nacimiento
-                <input name={`birthDate_${index}`} type="date" required />
-              </label>
-              <label>
-                Tipo de documento
-                <select name={`documentType_${index}`} defaultValue="ine">
-                  <option value="ine">Identificación oficial</option>
-                  <option value="curp">CURP</option>
-                  <option value="rfc">RFC</option>
-                  <option value="other">Otro</option>
+                Género
+                <select name={`gender_${index}`} required defaultValue="">
+                  <option value="" disabled>
+                    Elige
+                  </option>
+                  <option value="male">Varonil</option>
+                  <option value="female">Femenil</option>
                 </select>
               </label>
               <label>
-                Número de documento
-                <input name={`documentNumber_${index}`} required />
+                Fecha de nacimiento
+                <input name={`birthDate_${index}`} type="date" required />
               </label>
               <label>
                 Correo

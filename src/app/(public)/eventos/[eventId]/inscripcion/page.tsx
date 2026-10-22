@@ -5,7 +5,8 @@ import { listCompetitionsWithAvailability } from "@/modules/events/competitions"
 import { getPublicEvent, registrationIsOpen } from "@/modules/events/crud";
 import { fieldsForCompetition, listFormFields } from "@/modules/events/form";
 import { registerParticipant } from "@/modules/events/register";
-import type { DocumentType } from "@/modules/events/types";
+import type { ParticipantGender } from "@/modules/events/types";
+import { RegistrationForm } from "../../registration-form";
 
 export default async function InscripcionPage({
   params,
@@ -64,8 +65,9 @@ export default async function InscripcionPage({
         firstName: String(formData.get("firstName") ?? ""),
         lastName: String(formData.get("lastName") ?? ""),
         birthDate: String(formData.get("birthDate") ?? ""),
-        documentType: String(formData.get("documentType") ?? "ine") as DocumentType,
-        documentNumber: String(formData.get("documentNumber") ?? ""),
+        gender: String(formData.get("gender") ?? "") as ParticipantGender,
+        documentType: "other",
+        documentNumber: "",
         answers,
       },
     });
@@ -114,112 +116,32 @@ export default async function InscripcionPage({
       {comps.length === 0 ? (
         <p className="empty">No hay competencias individuales abiertas. Si es por equipo, usa el enlace de equipo.</p>
       ) : (
-        <form action={submit} className="stack card">
-          <label>
-            Competencia
-            <select name="competitionId" defaultValue={selectedId} required>
-              {comps.map((competition) => (
-                <option key={competition.id} value={competition.id} disabled={competition.full}>
-                  {competition.name}
-                  {competition.full ? " (sin cupo)" : ` · $${(competition.priceCents / 100).toFixed(2)}`}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Nombre
-            <input name="firstName" required />
-          </label>
-          <label>
-            Apellido
-            <input name="lastName" required />
-          </label>
-          <label>
-            Fecha de nacimiento
-            <input name="birthDate" type="date" required />
-          </label>
-          <label>
-            Tipo de documento
-            <select name="documentType" defaultValue="ine">
-              <option value="ine">Identificación oficial</option>
-              <option value="curp">CURP</option>
-              <option value="rfc">RFC</option>
-              <option value="other">Otro</option>
-            </select>
-          </label>
-          <label>
-            Número de documento
-            <input name="documentNumber" required />
-          </label>
-          <label>
-            Correo
-            <input name="email" type="email" required />
-          </label>
-
-          {fields.map((field) =>
-            field.fieldType === "heading" ? (
-              <h3 key={field.id}>{field.label}</h3>
-            ) : (
-              <label key={field.id}>
-                {field.label}
-                {field.fieldType === "textarea" ? (
-                  <textarea name={`field_${field.id}`} required={field.required} />
-                ) : field.fieldType === "select" || field.fieldType === "radio" ? (
-                  <select name={`field_${field.id}`} required={field.required} defaultValue="">
-                    <option value="" disabled>
-                      Elige
-                    </option>
-                    {field.options.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    name={`field_${field.id}`}
-                    type={field.fieldType === "number" ? "number" : field.fieldType === "file" ? "text" : "text"}
-                    required={field.required}
-                    placeholder={field.fieldType === "file" ? "Clave del archivo" : undefined}
-                  />
-                )}
-              </label>
-            ),
-          )}
-
-          {addOns.map((addOn) => (
-            <label key={addOn.id} className={addOn.options.length === 0 ? "switch-row" : undefined}>
-              {addOn.options.length === 0 ? (
-                <>
-                  <input name={`addon_${addOn.id}`} type="checkbox" required={addOn.required} />
-                  {addOn.name} (+${(addOn.priceCents / 100).toFixed(2)})
-                </>
-              ) : (
-                <>
-                  {addOn.name} (+${(addOn.priceCents / 100).toFixed(2)})
-                  <select name={`addon_${addOn.id}`} required={addOn.required} defaultValue="">
-                    <option value="">{addOn.required ? "Elige" : "Sin adicional"}</option>
-                    {addOn.options.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </>
-              )}
-            </label>
-          ))}
-
-          <label className="switch-row">
-            <input name="acceptedTerms" type="checkbox" required />
-            Acepto los términos
-          </label>
-          <label className="switch-row">
-            <input name="acceptedWaiver" type="checkbox" required />
-            Acepto la renuncia de responsabilidad
-          </label>
-          <button type="submit">Enviar inscripción</button>
-        </form>
+        <RegistrationForm
+          eventId={eventId}
+          eventDateIso={event.eventDate.toISOString()}
+          selectedCompetitionId={selectedId}
+          competitions={comps.map((competition) => ({
+            id: competition.id,
+            name: competition.name,
+            priceCents: competition.priceCents,
+            full: competition.full,
+          }))}
+          fields={fields.map((field) => ({
+            id: field.id,
+            label: field.label,
+            fieldType: field.fieldType,
+            required: field.required,
+            options: field.options,
+          }))}
+          addOns={addOns.map((addOn) => ({
+            id: addOn.id,
+            name: addOn.name,
+            priceCents: addOn.priceCents,
+            required: addOn.required,
+            options: addOn.options,
+          }))}
+          action={submit}
+        />
       )}
     </div>
   );

@@ -5,8 +5,9 @@ import { persistRegistrationAddOns } from "@/modules/events/add-ons";
 import { assignBib } from "@/modules/events/bib";
 import { capacityAvailable, countActiveRegistrations } from "@/modules/events/capacity";
 import { registrationIsOpen } from "@/modules/events/crud";
+import { GENDER_ANSWER_KEY, parseGender } from "@/modules/events/category-eligibility";
 import { listFormFields, validateCustomAnswers } from "@/modules/events/form";
-import type { ActionResult, DocumentType, ParticipantInput } from "@/modules/events/types";
+import type { ActionResult, DocumentType, ParticipantGender, ParticipantInput } from "@/modules/events/types";
 
 const DOCUMENT_TYPES: DocumentType[] = ["ine", "curp", "rfc", "other"];
 
@@ -14,17 +15,16 @@ export function parseParticipant(raw: ParticipantInput): ActionResult<Participan
   const email = raw.email.trim().toLowerCase();
   const firstName = raw.firstName.trim();
   const lastName = raw.lastName.trim();
-  const documentNumber = raw.documentNumber.trim();
-  const documentType = raw.documentType;
+  const documentNumber = (raw.documentNumber ?? "").trim();
+  const documentType =
+    raw.documentType && DOCUMENT_TYPES.includes(raw.documentType) ? raw.documentType : "other";
   const birthDate = raw.birthDate;
+  const gender = parseGender(raw.gender) as ParticipantGender | null;
 
   if (!email || !email.includes("@")) return { ok: false, message: "El correo no es válido." };
   if (!firstName) return { ok: false, message: "Falta el nombre." };
   if (!lastName) return { ok: false, message: "Falta el apellido." };
-  if (!documentNumber) return { ok: false, message: "Falta el número de documento." };
-  if (!DOCUMENT_TYPES.includes(documentType)) {
-    return { ok: false, message: "Tipo de documento no válido." };
-  }
+  if (!gender) return { ok: false, message: "Selecciona el género." };
   const birth = new Date(`${birthDate}T12:00:00`);
   if (Number.isNaN(birth.getTime())) return { ok: false, message: "La fecha de nacimiento no es válida." };
 
@@ -34,6 +34,7 @@ export function parseParticipant(raw: ParticipantInput): ActionResult<Participan
     firstName,
     lastName,
     birthDate,
+    gender,
     documentType,
     documentNumber,
     answers: raw.answers ?? {},
@@ -71,8 +72,15 @@ export async function registerParticipant(
     eventId: input.eventId,
     competitionId: input.competitionId,
     answers: participant.answers ?? {},
+    gender: participant.gender,
+    birthDate: participant.birthDate,
+    eventDate: event.eventDate,
   });
   if (!answersCheck.ok) return answersCheck;
+  const answersWithGender = {
+    ...answersCheck.answers,
+    [GENDER_ANSWER_KEY]: participant.gender,
+  };
 
   try {
     const created = await db.transaction(async (tx) => {
@@ -105,7 +113,7 @@ export async function registerParticipant(
           documentNumber: participant.documentNumber,
           status,
           origin: "public",
-          answers: answersCheck.answers,
+          answers: answersWithGender,
           acceptedTermsAt: now,
           acceptedWaiverAt: now,
         })

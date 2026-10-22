@@ -10,12 +10,15 @@ export type ActionResult<T extends object = object> =
   | ({ ok: true } & T)
   | { ok: false; message: string };
 
+export type ParticipantGender = "male" | "female";
+
 export type ParticipantInput = {
   email: string;
   firstName: string;
   lastName: string;
   birthDate: string;
-  documentType: DocumentType;
-  documentNumber: string;
+  gender: ParticipantGender;
+  documentType?: DocumentType;
+  documentNumber?: string;
   answers?: Record<string, unknown>;
 };

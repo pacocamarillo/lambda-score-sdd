@@ -7,6 +7,8 @@ import {
   saveCompetition,
 } from "@/modules/events/competitions";
 import { getOwnedEvent } from "@/modules/events/crud";
+import { formatIncludedItemsSummary, includedItemsFromFormData } from "@/modules/events/included-items";
+import { IncludedItemsField } from "../../included-items-field";
 import { EventNav } from "../../event-nav";
 
 export default async function EventCompetitionsPage({
@@ -45,7 +47,7 @@ export default async function EventCompetitionsPage({
         teamMinSize: mode === "team" ? Number(formData.get("teamMinSize") ?? 2) : null,
         teamNameRequired: formData.get("teamNameRequired") === "on",
         priceMode: formData.get("priceMode") === "per_team" ? "per_team" : "per_person",
-        includedItems: String(formData.get("includedItems") ?? "") || null,
+        includedItems: includedItemsFromFormData(formData),
         bibColor: String(formData.get("bibColor") ?? "") || null,
         cashOnEvent: formData.get("cashOnEvent") === "on",
       },
@@ -97,6 +99,7 @@ export default async function EventCompetitionsPage({
                   <th scope="col">Nombre</th>
                   <th scope="col">Precio</th>
                   <th scope="col">Cupo</th>
+                  <th scope="col">Artículos</th>
                   <th scope="col">Modo</th>
                   <th scope="col">Acciones</th>
                 </tr>
@@ -111,6 +114,7 @@ export default async function EventCompetitionsPage({
                         ? `Ilimitado (${competition.used})`
                         : `${competition.used} / ${competition.capacity}${competition.full ? " (llena)" : ""}`}
                     </td>
+                    <td>{formatIncludedItemsSummary(competition.includedItems)}</td>
                     <td>{competition.mode === "team" ? "Equipo" : "Individual"}</td>
                     <td>
                       {canEdit ? (
@@ -172,10 +176,7 @@ export default async function EventCompetitionsPage({
                 <option value="per_team">Por equipo</option>
               </select>
             </label>
-            <label>
-              Artículos incluidos
-              <input name="includedItems" placeholder="Medalla, playera" />
-            </label>
+            <IncludedItemsField />
             <label>
               Color de folio
               <input name="bibColor" placeholder="#ff6600" />

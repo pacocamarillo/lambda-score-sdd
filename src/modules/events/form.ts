@@ -1,6 +1,11 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { events, formFields, registrations, competitions } from "@/db/schema/events";
+import {
+  filterCategoryOptions,
+  isCategoryFormField,
+  type Gender,
+} from "@/modules/events/category-eligibility";
 import type { ActionResult, FormFieldType } from "@/modules/events/types";
 
 const FIELD_TYPES: FormFieldType[] = ["text", "number", "select", "radio", "textarea", "file", "heading"];
@@ -99,12 +104,27 @@ export async function validateCustomAnswers(input: {
   eventId: string;
   competitionId: string;
   answers: Record<string, unknown>;
+  gender?: Gender | null;
+  birthDate?: string;
+  eventDate?: Date;
 }): Promise<ActionResult<{ answers: Record<string, unknown> }>> {
   const fields = fieldsForCompetition(await listFormFields(input.eventId), input.competitionId);
   const cleaned: Record<string, unknown> = {};
+  const eventDate = input.eventDate ?? new Date();
 
   for (const field of fields) {
     if (field.fieldType === "heading") continue;
+
+    const allowedOptions = isCategoryFormField(field)
+      ? filterCategoryOptions({
+          label: field.label,
+          options: field.options,
+          gender: input.gender ?? null,
+          birthDate: input.birthDate ?? "",
+          eventDate,
+        })
+      : field.options;
+
     const raw = input.answers[field.id];
     const empty =
       raw == null ||
@@ -112,6 +132,7 @@ export async function validateCustomAnswers(input: {
       (Array.isArray(raw) && raw.length === 0);
 
     if (field.required && empty) {
+      if (isCategoryFormField(field) && allowedOptions.length === 0) continue;
       return { ok: false, message: `Falta completar: ${field.label}.` };
     }
     if (empty) continue;
@@ -122,8 +143,14 @@ export async function validateCustomAnswers(input: {
       cleaned[field.id] = number;
     } else if (field.fieldType === "select" || field.fieldType === "radio") {
       const value = String(raw);
-      if (!field.options.includes(value)) {
-        return { ok: false, message: `Opción no válida en ${field.label}.` };
+      const validOptions = isCategoryFormField(field) ? allowedOptions : field.options;
+      if (!validOptions.includes(value)) {
+        return {
+          ok: false,
+          message: isCategoryFormField(field)
+            ? `La opción elegida en ${field.label} no corresponde a tu género o edad.`
+            : `Opción no válida en ${field.label}.`,
+        };
       }
       cleaned[field.id] = value;
     } else {

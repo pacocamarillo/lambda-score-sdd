@@ -754,6 +754,45 @@ button:disabled,
   gap: 1rem;
 }
 
+.apparel-block .size-grid {
+  display: none;
+}
+
+.apparel-block:has(.apparel-toggle:checked) .size-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: 0.35rem 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: #f8fbfc;
+}
+
+.apparel-block .size-grid > .hint {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.apparel-block .size-grid .switch-row {
+  justify-content: flex-start;
+  gap: 0.4rem;
+}
+
+.mtb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.35rem 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: #f8fbfc;
+}
+
+.mtb-grid .switch-row {
+  justify-content: flex-start;
+  gap: 0.4rem;
+}
+
 .welcome-card {
   background: linear-gradient(135deg, #ffffff 0%, #f3f9fb 100%);
   border-color: #d4e8ee;

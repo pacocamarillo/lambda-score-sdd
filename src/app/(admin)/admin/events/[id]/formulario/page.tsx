@@ -3,8 +3,26 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getOwnedEvent } from "@/modules/events/crud";
 import { deleteFormField, listFormFields, saveFormField } from "@/modules/events/form";
+import {
+  loadMtbCategorySelections,
+  mtbSelectionsFromFormData,
+  saveMtbCategories,
+} from "@/modules/events/mtb-categories";
+import {
+  loadRunningCategorySelections,
+  runningSelectionsFromFormData,
+  saveRunningCategories,
+} from "@/modules/events/running-categories";
+import {
+  loadSpecialCategorySelections,
+  saveSpecialCategories,
+  specialSelectionsFromFormData,
+} from "@/modules/events/special-categories";
 import type { FormFieldType } from "@/modules/events/types";
 import { EventNav } from "../../event-nav";
+import { MtbCategoriesField } from "../../mtb-categories-field";
+import { RunningCategoriesField } from "../../running-categories-field";
+import { SpecialCategoriesField } from "../../special-categories-field";
 
 export default async function EventFormPage({
   params,
@@ -20,6 +38,9 @@ export default async function EventFormPage({
   const event = await getOwnedEvent(id, session.organizationId);
   if (!event) redirect("/admin/events");
   const fields = await listFormFields(id);
+  const mtbSelections = await loadMtbCategorySelections(id);
+  const runningSelections = await loadRunningCategorySelections(id);
+  const specialSelections = await loadSpecialCategorySelections(id);
   const canEdit = session.role === "owner" || session.role === "admin";
 
   async function save(formData: FormData) {
@@ -32,14 +53,56 @@ export default async function EventFormPage({
       .split(",")
       .map((part) => part.trim())
       .filter(Boolean);
+    const existing = await listFormFields(id);
     const result = await saveFormField(id, current.organizationId, {
       label: String(formData.get("label") ?? ""),
       fieldType: String(formData.get("fieldType") ?? "text") as FormFieldType,
       required: formData.get("required") === "on",
       uniqueInEvent: formData.get("uniqueInEvent") === "on",
       options,
-      sortOrder: Number(formData.get("sortOrder") ?? fields.length),
+      sortOrder: Number(formData.get("sortOrder") ?? existing.length),
     });
+    if (!result.ok) redirect(`/admin/events/${id}/formulario?error=${encodeURIComponent(result.message)}`);
+    redirect(`/admin/events/${id}/formulario?saved=1`);
+  }
+
+  async function saveMtb(formData: FormData) {
+    "use server";
+    const current = await auth();
+    if (!current?.organizationId || (current.role !== "owner" && current.role !== "admin")) {
+      redirect("/admin");
+    }
+    const result = await saveMtbCategories(id, current.organizationId, mtbSelectionsFromFormData(formData));
+    if (!result.ok) redirect(`/admin/events/${id}/formulario?error=${encodeURIComponent(result.message)}`);
+    redirect(`/admin/events/${id}/formulario?saved=1`);
+  }
+
+  async function saveRunning(formData: FormData) {
+    "use server";
+    const current = await auth();
+    if (!current?.organizationId || (current.role !== "owner" && current.role !== "admin")) {
+      redirect("/admin");
+    }
+    const result = await saveRunningCategories(
+      id,
+      current.organizationId,
+      runningSelectionsFromFormData(formData),
+    );
+    if (!result.ok) redirect(`/admin/events/${id}/formulario?error=${encodeURIComponent(result.message)}`);
+    redirect(`/admin/events/${id}/formulario?saved=1`);
+  }
+
+  async function saveSpecial(formData: FormData) {
+    "use server";
+    const current = await auth();
+    if (!current?.organizationId || (current.role !== "owner" && current.role !== "admin")) {
+      redirect("/admin");
+    }
+    const result = await saveSpecialCategories(
+      id,
+      current.organizationId,
+      specialSelectionsFromFormData(formData),
+    );
     if (!result.ok) redirect(`/admin/events/${id}/formulario?error=${encodeURIComponent(result.message)}`);
     redirect(`/admin/events/${id}/formulario?saved=1`);
   }
@@ -88,7 +151,12 @@ export default async function EventFormPage({
               <tbody>
                 {fields.map((field) => (
                   <tr key={field.id}>
-                    <td>{field.label}</td>
+                    <td>
+                      {field.label}
+                      {field.options.length > 0 ? (
+                        <div className="hint">{field.options.join(", ")}</div>
+                      ) : null}
+                    </td>
                     <td>{field.fieldType}</td>
                     <td>{field.required ? "Sí" : "No"}</td>
                     <td>{field.uniqueInEvent ? "Sí" : "No"}</td>
@@ -109,6 +177,33 @@ export default async function EventFormPage({
           </div>
         )}
       </section>
+
+      {canEdit ? (
+        <section className="card">
+          <form action={saveMtb} className="stack">
+            <MtbCategoriesField selections={mtbSelections} />
+            <button type="submit">Guardar categorías MTB</button>
+          </form>
+        </section>
+      ) : null}
+
+      {canEdit ? (
+        <section className="card">
+          <form action={saveRunning} className="stack">
+            <RunningCategoriesField selections={runningSelections} />
+            <button type="submit">Guardar categorías Running</button>
+          </form>
+        </section>
+      ) : null}
+
+      {canEdit ? (
+        <section className="card">
+          <form action={saveSpecial} className="stack">
+            <SpecialCategoriesField selections={specialSelections} />
+            <button type="submit">Guardar categorías especiales</button>
+          </form>
+        </section>
+      ) : null}
 
       {canEdit ? (
         <section className="card">
