@@ -13,7 +13,14 @@ export default async function InscripcionPage({
   searchParams,
 }: {
   params: Promise<{ eventId: string }>;
-  searchParams: Promise<{ competitionId?: string; error?: string; ok?: string; status?: string; bib?: string }>;
+  searchParams: Promise<{
+    competitionId?: string;
+    error?: string;
+    ok?: string;
+    status?: string;
+    bib?: string;
+    registrationId?: string;
+  }>;
 }) {
   const { eventId } = await params;
   const query = await searchParams;
@@ -80,7 +87,7 @@ export default async function InscripcionPage({
     const bib =
       result.bib && published?.showBibOnConfirmation ? `&bib=${encodeURIComponent(result.bib)}` : "";
     redirect(
-      `/eventos/${eventId}/inscripcion?ok=1&status=${encodeURIComponent(result.status)}${bib}`,
+      `/eventos/${eventId}/inscripcion?ok=1&status=${encodeURIComponent(result.status)}&registrationId=${encodeURIComponent(result.registrationId)}${bib}`,
     );
   }
 
@@ -94,6 +101,11 @@ export default async function InscripcionPage({
             : "Tu inscripción quedó pendiente de pago."}
         </p>
         {query.bib ? <p>Folio: {query.bib}</p> : null}
+        {query.registrationId ? (
+          <a className="button" href={`/eventos/${eventId}/carta?registrationId=${encodeURIComponent(query.registrationId)}`}>
+            Descargar carta de exoneración (PDF)
+          </a>
+        ) : null}
         <Link href={`/eventos/${eventId}`}>Volver al evento</Link>
       </div>
     );

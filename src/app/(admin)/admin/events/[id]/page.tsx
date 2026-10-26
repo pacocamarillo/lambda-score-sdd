@@ -1,8 +1,11 @@
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import path from "node:path";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { listCompetitions } from "@/modules/events/competitions";
 import { deleteEvent, getOwnedEvent, updateEvent } from "@/modules/events/crud";
+import { validateEventImage } from "@/modules/events/event-image";
 import {
   cancelEvent,
   describePublishBlockers,
@@ -10,6 +13,7 @@ import {
   publishEvent,
   setRegistrationOpen,
 } from "@/modules/events/publish";
+import { DangerSubmitButton } from "../danger-submit-button";
 import { EventNav } from "../event-nav";
 
 function toLocalInput(value: Date | null | undefined) {
@@ -43,6 +47,20 @@ export default async function EventEditPage({
       redirect("/admin");
     }
     const deadlineRaw = String(formData.get("registrationDeadline") ?? "");
+    const imageFile = formData.get("coverImage");
+    let imageKey: string | undefined;
+    if (imageFile instanceof File && imageFile.size > 0) {
+      const bytes = new Uint8Array(await imageFile.arrayBuffer());
+      const checked = validateEventImage(bytes);
+      if (!checked.ok) redirect(`/admin/events/${id}?error=${encodeURIComponent(checked.message)}`);
+      const directory = path.join(process.cwd(), "public", "uploads", "events");
+      await mkdir(directory, { recursive: true });
+      await writeFile(path.join(directory, `${id}.${checked.ext}`), bytes);
+      for (const ext of ["png", "jpg", "gif"] as const) {
+        if (ext !== checked.ext) await rm(path.join(directory, `${id}.${ext}`), { force: true });
+      }
+      imageKey = `/uploads/events/${id}.${checked.ext}?v=${Date.now()}`;
+    }
     const result = await updateEvent(id, current.organizationId, {
       name: String(formData.get("name") ?? ""),
       venue: String(formData.get("venue") ?? ""),
@@ -56,6 +74,7 @@ export default async function EventEditPage({
       bibPrefix: String(formData.get("bibPrefix") ?? ""),
       autoAssignBib: formData.get("autoAssignBib") === "on",
       showBibOnConfirmation: formData.get("showBibOnConfirmation") === "on",
+      imageKey,
     });
     if (!result.ok) redirect(`/admin/events/${id}?error=${encodeURIComponent(result.message)}`);
     redirect(`/admin/events/${id}?saved=1`);
@@ -194,18 +213,19 @@ export default async function EventEditPage({
                 </button>
               </form>
             ) : null}
-            <form action={remove}>
-              <button type="submit" className="ghost">
-                Eliminar
-              </button>
-            </form>
           </div>
+        ) : null}
+        {canEdit ? (
+          <form action={remove} className="danger-zone">
+            <DangerSubmitButton>Eliminar</DangerSubmitButton>
+            <p className="hint">Quita el evento de forma permanente. Pide confirmación para no pulsarlo por error.</p>
+          </form>
         ) : null}
       </section>
 
       <section className="card">
         <h2>Información</h2>
-        <form action={save} className="stack">
+        <form action={save} className="stack" encType="multipart/form-data">
           <label>
             Nombre
             <input name="name" defaultValue={event.name} required disabled={!canEdit} />
@@ -224,6 +244,20 @@ export default async function EventEditPage({
             Lugar
             <input name="venue" defaultValue={event.venue} required disabled={!canEdit} />
           </label>
+          <label>
+            Imagen del evento
+            <input
+              name="coverImage"
+              type="file"
+              accept="image/png,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif"
+              disabled={!canEdit}
+            />
+          </label>
+          <p className="hint">
+            Dimensiones recomendadas: 1200×630 px (proporción 1.91:1) o superior, manteniendo una
+            proporción similar. Máximo 3 MB. PNG, JPG o GIF.
+          </p>
+          {event.imageKey ? <img className="event-cover" src={event.imageKey} alt={event.name} /> : null}
           <label>
             Descripción
             <textarea name="description" defaultValue={event.description} disabled={!canEdit} />

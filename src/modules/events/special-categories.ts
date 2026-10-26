@@ -5,6 +5,7 @@ import {
   SPECIAL_CATEGORY_FIELD_LABEL,
   SPECIAL_CATEGORY_NAMES,
 } from "@/modules/events/category-catalog";
+import { mergeCategoryOptions } from "@/modules/events/custom-categories";
 import { saveFormField } from "@/modules/events/form";
 import type { ActionResult } from "@/modules/events/types";
 
@@ -15,15 +16,15 @@ export {
 
 export function specialSelectionsFromFormData(formData: FormData): string[] {
   const selected = formData.getAll("special_category").map(String);
-  return SPECIAL_CATEGORY_NAMES.filter((name) => selected.includes(name));
+  const custom = String(formData.get("special_category_custom") ?? "");
+  return mergeCategoryOptions(selected, custom, SPECIAL_CATEGORY_NAMES);
 }
 
 export async function loadSpecialCategorySelections(eventId: string): Promise<string[]> {
   const db = getDb();
   const fields = await db.select().from(formFields).where(eq(formFields.eventId, eventId));
   const field = fields.find((row) => row.label === SPECIAL_CATEGORY_FIELD_LABEL);
-  if (!field?.options?.length) return [];
-  return field.options.filter((option) => (SPECIAL_CATEGORY_NAMES as readonly string[]).includes(option));
+  return field?.options ?? [];
 }
 
 export async function saveSpecialCategories(

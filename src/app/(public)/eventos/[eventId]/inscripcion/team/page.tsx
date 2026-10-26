@@ -4,6 +4,7 @@ import { listCompetitionsWithAvailability } from "@/modules/events/competitions"
 import { getPublicEvent, registrationIsOpen } from "@/modules/events/crud";
 import { registerTeam } from "@/modules/events/teams";
 import type { ParticipantGender, ParticipantInput } from "@/modules/events/types";
+import { WaiverDownloadButton } from "../../../waiver-download-button";
 
 function memberFromForm(formData: FormData, index: number): ParticipantInput {
   return {
@@ -22,7 +23,7 @@ export default async function TeamInscripcionPage({
   searchParams,
 }: {
   params: Promise<{ eventId: string }>;
-  searchParams: Promise<{ competitionId?: string; error?: string; ok?: string; status?: string }>;
+  searchParams: Promise<{ competitionId?: string; error?: string; ok?: string; status?: string; registrationId?: string }>;
 }) {
   const { eventId } = await params;
   const query = await searchParams;
@@ -60,8 +61,9 @@ export default async function TeamInscripcionPage({
         `/eventos/${eventId}/inscripcion/team?competitionId=${encodeURIComponent(competitionId)}&error=${encodeURIComponent(result.message)}`,
       );
     }
+    const registrationId = result.registrationIds[0] ?? "";
     redirect(
-      `/eventos/${eventId}/inscripcion/team?ok=1&status=${encodeURIComponent(result.status)}`,
+      `/eventos/${eventId}/inscripcion/team?ok=1&status=${encodeURIComponent(result.status)}&registrationId=${encodeURIComponent(registrationId)}`,
     );
   }
 
@@ -74,6 +76,11 @@ export default async function TeamInscripcionPage({
             ? "El equipo quedó confirmado."
             : "El equipo quedó pendiente de pago."}
         </p>
+        {query.registrationId ? (
+          <a className="button" href={`/eventos/${eventId}/carta?registrationId=${encodeURIComponent(query.registrationId)}`}>
+            Descargar carta de exoneración (PDF)
+          </a>
+        ) : null}
         <Link href={`/eventos/${eventId}`}>Volver al evento</Link>
       </div>
     );
@@ -153,8 +160,20 @@ export default async function TeamInscripcionPage({
           </label>
           <label className="switch-row">
             <input name="acceptedWaiver" type="checkbox" required />
-            Acepto la renuncia de responsabilidad
+            Acepto la carta de exoneración
           </label>
+          <WaiverDownloadButton
+            eventId={eventId}
+            fields={{
+              firstName: "firstName_0",
+              lastName: "lastName_0",
+              birthDate: "birthDate_0",
+              email: "email_0",
+              competitionId: "competitionId",
+              gender: "gender_0",
+            }}
+          />
+          <p className="hint">El PDF usa los datos del evento y del primer integrante capturado.</p>
           <button type="submit">Inscribir equipo</button>
         </form>
       )}

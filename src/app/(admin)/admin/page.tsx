@@ -1,5 +1,12 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
+import { listOrganizationEvents } from "@/modules/events/crud";
+
+const STATUS_LABEL: Record<string, string> = {
+  draft: "Borrador",
+  published: "Publicado",
+  cancelled: "Cancelado",
+};
 
 const included = [
   { href: "/admin/settings/measurement", label: "Medición de visitas y conversiones", ownerOnly: true },
@@ -26,6 +33,9 @@ export default async function AdminHomePage() {
   if (role === "owner" || role === "admin") actions.push({ href: "/admin/website", label: "Página web" });
   if (role === "owner") actions.push({ href: "/admin/settings", label: "Configuración" });
   if (role === "admin") actions.push({ href: "/admin/coupons", label: "Cupones" });
+  const recentEvents = session?.organizationId
+    ? (await listOrganizationEvents(session.organizationId)).slice(0, 5)
+    : [];
 
   return (
     <div className="dashboard">
@@ -39,7 +49,23 @@ export default async function AdminHomePage() {
             <h2>Eventos recientes</h2>
             <Link href="/admin/events">Ver todos</Link>
           </div>
-          <p className="empty">No hay eventos recientes. El primero lleva nombre, fecha, lugar y al menos una competencia.</p>
+          {recentEvents.length === 0 ? (
+            <p className="empty">No hay eventos recientes. El primero lleva nombre, fecha, lugar y al menos una competencia.</p>
+          ) : (
+            <ul className="recent-list">
+              {recentEvents.map((event) => (
+                <li key={event.id}>
+                  <span>
+                    <Link href={`/admin/events/${event.id}`}>{event.name}</Link>
+                    <span className="detail">
+                      {event.eventDate.toLocaleString("es-MX", { timeZone: "America/Mexico_City" })} · {event.venue}
+                    </span>
+                  </span>
+                  <span className="badge">{STATUS_LABEL[event.status] ?? event.status}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
         <div className="stack">
           <section className="card">

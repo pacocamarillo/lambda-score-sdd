@@ -3,6 +3,7 @@ import {
   RUNNING_CATEGORY_NAMES,
   type RunningGroupKey,
 } from "@/modules/events/category-catalog";
+import { customCategoryNames } from "@/modules/events/custom-categories";
 
 export function RunningCategoriesField({
   selections,
@@ -13,11 +14,12 @@ export function RunningCategoriesField({
     <fieldset className="stack">
       <legend>Categorías Running</legend>
       <p className="hint">
-        Marca las categorías que aparecerán en la inscripción. Se guardan como listas de opción
-        única (varonil y femenil).
+        Marca las del catálogo o escribe categorías nuevas, una por línea. Las nuevas también
+        aparecen en la inscripción.
       </p>
       {RUNNING_CATEGORY_GROUPS.map((group) => {
         const selected = new Set(selections[group.key] ?? []);
+        const custom = customCategoryNames(selections[group.key] ?? [], RUNNING_CATEGORY_NAMES);
         return (
           <div key={group.key} className="stack">
             <h3>{group.label}</h3>
@@ -34,6 +36,15 @@ export function RunningCategoriesField({
                 </label>
               ))}
             </div>
+            <label>
+              Otras categorías {group.label}
+              <textarea
+                name={`running_${group.key}_custom`}
+                defaultValue={custom.join("\n")}
+                placeholder="Una categoría por línea"
+                rows={3}
+              />
+            </label>
           </div>
         );
       })}

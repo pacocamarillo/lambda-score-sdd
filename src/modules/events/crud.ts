@@ -23,6 +23,7 @@ export type EventWritable = {
   bibPrefix?: string;
   autoAssignBib?: boolean;
   showBibOnConfirmation?: boolean;
+  imageKey?: string | null;
 };
 
 export async function createEvent(
@@ -97,6 +98,7 @@ export async function updateEvent(
       bibPrefix: input.bibPrefix ?? event.bibPrefix,
       autoAssignBib: input.autoAssignBib ?? event.autoAssignBib,
       showBibOnConfirmation: input.showBibOnConfirmation ?? event.showBibOnConfirmation,
+      ...(input.imageKey !== undefined ? { imageKey: input.imageKey } : {}),
     })
     .where(eq(events.id, eventId));
 

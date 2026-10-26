@@ -16,6 +16,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ ev
         <h1>{event.name}</h1>
         <p className="lede">{event.description || "Evento publicado."}</p>
       </header>
+      {event.imageKey ? <img className="event-cover" src={event.imageKey} alt={event.name} /> : null}
       <section className="card">
         <p>
           <strong>Fecha:</strong>{" "}

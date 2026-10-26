@@ -6,6 +6,7 @@ import {
   MTB_CATEGORY_NAMES,
   type MtbGroupKey,
 } from "@/modules/events/category-catalog";
+import { mergeCategoryOptions } from "@/modules/events/custom-categories";
 import { saveFormField } from "@/modules/events/form";
 import type { ActionResult } from "@/modules/events/types";
 
@@ -19,7 +20,8 @@ export function mtbSelectionsFromFormData(formData: FormData): Record<MtbGroupKe
   const result = { varonil: [] as string[], femenil: [] as string[] };
   for (const group of MTB_CATEGORY_GROUPS) {
     const selected = formData.getAll(`mtb_${group.key}`).map(String);
-    result[group.key] = MTB_CATEGORY_NAMES.filter((name) => selected.includes(name));
+    const custom = String(formData.get(`mtb_${group.key}_custom`) ?? "");
+    result[group.key] = mergeCategoryOptions(selected, custom, MTB_CATEGORY_NAMES);
   }
   return result;
 }
@@ -31,9 +33,7 @@ export async function loadMtbCategorySelections(eventId: string): Promise<Record
 
   for (const group of MTB_CATEGORY_GROUPS) {
     const field = fields.find((row) => row.label === group.fieldLabel);
-    result[group.key] = field?.options?.length
-      ? field.options.filter((option) => (MTB_CATEGORY_NAMES as readonly string[]).includes(option))
-      : [];
+    result[group.key] = field?.options ?? [];
   }
 
   return result;

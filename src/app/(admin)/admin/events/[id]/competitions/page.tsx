@@ -49,7 +49,7 @@ export default async function EventCompetitionsPage({
         priceMode: formData.get("priceMode") === "per_team" ? "per_team" : "per_person",
         includedItems: includedItemsFromFormData(formData),
         bibColor: String(formData.get("bibColor") ?? "") || null,
-        cashOnEvent: formData.get("cashOnEvent") === "on",
+        cashOnEvent: false,
       },
       String(formData.get("competitionId") ?? "") || undefined,
     );
@@ -180,10 +180,6 @@ export default async function EventCompetitionsPage({
             <label>
               Color de folio
               <input name="bibColor" placeholder="#ff6600" />
-            </label>
-            <label className="switch-row">
-              <input name="cashOnEvent" type="checkbox" />
-              Efectivo el día del evento (dato; el cobro es de pagos)
             </label>
             <button type="submit">Guardar competencia</button>
           </form>
