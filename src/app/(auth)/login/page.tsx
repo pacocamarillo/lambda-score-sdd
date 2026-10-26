@@ -2,6 +2,7 @@ import { AuthError } from "next-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthBrand } from "@/app/auth-brand";
+import { BuildStamp } from "@/app/build-stamp";
 import { PasswordField } from "@/app/password-field";
 import { signIn } from "@/lib/auth";
 import { INVALID_CREDENTIALS, verifyLogin } from "@/modules/access/login";
@@ -87,6 +88,7 @@ export default async function LoginPage({
       <p>
         ¿Aún no tienes organización? <Link href="/signup">Crear organización</Link>
       </p>
+      <BuildStamp />
       </main>
     </div>
   );
