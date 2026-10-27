@@ -23,20 +23,25 @@ export function ageOnDate(birthDate: string | Date, onDate: Date): number | null
 }
 
 const MTB_AGE_RANGES: Record<(typeof MTB_CATEGORY_NAMES)[number], AgeRange> = {
-  "INFANTIL A": { min: 0, max: 9 },
-  "INFANTIL B": { min: 10, max: 12 },
+  "INFANTIL A": { min: 9, max: 10 },
+  "INFANTIL B": { min: 11, max: 12 },
   "JUVENIL A": { min: 13, max: 14 },
   "JUVENIL B": { min: 15, max: 16 },
-  "JUVENIL C": { min: 17, max: 18 },
-  "MASTER 20": { min: 19, max: 29 },
+  "JUVENIL C": { min: 17, max: 19 },
+  "MASTER 20": { min: 20, max: 29 },
   "MASTER 30": { min: 30, max: 39 },
   "MASTER 40": { min: 40, max: 49 },
   "MASTER 50": { min: 50, max: 59 },
   "MASTER 60": { min: 60, max: 69 },
   "MASTER 70": { min: 70, max: null },
-  ELITE: { min: 19, max: null },
-  PRINCIPAINTE: { min: 15, max: null },
-  ENTUSIASTAS: { min: 15, max: null },
+  ELITE: { min: 0, max: null },
+  PRINCIPIANTES: { min: 0, max: null },
+  ENTUSIASTAS: { min: 0, max: null },
+};
+
+/** Nombre legado con typo; se trata como PRINCIPIANTES. */
+const MTB_OPTION_ALIASES: Record<string, (typeof MTB_CATEGORY_NAMES)[number]> = {
+  PRINCIPAINTE: "PRINCIPIANTES",
 };
 
 const RUNNING_AGE_RANGES: Record<(typeof RUNNING_CATEGORY_NAMES)[number], AgeRange> = {
@@ -80,7 +85,8 @@ export function isCategoryFormField(field: { label: string }): boolean {
 export function optionEligibleForAge(option: string, age: number, kind: "mtb" | "running" | "special"): boolean {
   if (kind === "special") return true;
   if (kind === "mtb") {
-    const range = MTB_AGE_RANGES[option as (typeof MTB_CATEGORY_NAMES)[number]];
+    const normalized = MTB_OPTION_ALIASES[option] ?? option;
+    const range = MTB_AGE_RANGES[normalized as (typeof MTB_CATEGORY_NAMES)[number]];
     return range ? inAgeRange(age, range) : true;
   }
   const range = RUNNING_AGE_RANGES[option as (typeof RUNNING_CATEGORY_NAMES)[number]];
