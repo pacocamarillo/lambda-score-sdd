@@ -75,7 +75,14 @@ export default async function PublicEventPage({ params }: { params: Promise<{ ev
 
       {open ? (
         <p>
-          <Link className="button" href={`/eventos/${eventId}/inscripcion`}>
+          <Link
+            className="button"
+            href={
+              comps.some((competition) => competition.mode === "individual") || comps.length === 0
+                ? `/eventos/${eventId}/inscripcion`
+                : `/eventos/${eventId}/inscripcion/team`
+            }
+          >
             Ir a inscripción
           </Link>
         </p>

@@ -13,6 +13,7 @@ type CompetitionOption = {
   name: string;
   priceCents: number;
   full: boolean;
+  mode?: "individual" | "team";
 };
 
 type FormFieldOption = {
@@ -127,10 +128,23 @@ export function RegistrationForm({
 
       <label>
         Competencia
-        <select name="competitionId" defaultValue={selectedCompetitionId} required>
+        <select
+          name="competitionId"
+          defaultValue={selectedCompetitionId}
+          required
+          onChange={(event) => {
+            const chosen = competitions.find((competition) => competition.id === event.target.value);
+            if (chosen?.mode === "team") {
+              window.location.assign(
+                `/eventos/${eventId}/inscripcion/team?competitionId=${encodeURIComponent(chosen.id)}`,
+              );
+            }
+          }}
+        >
           {competitions.map((competition) => (
             <option key={competition.id} value={competition.id} disabled={competition.full}>
               {competition.name}
+              {competition.mode === "team" ? " · Equipo" : ""}
               {competition.full ? " (sin cupo)" : ` · $${(competition.priceCents / 100).toFixed(2)}`}
             </option>
           ))}
