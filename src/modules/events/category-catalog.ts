@@ -32,7 +32,28 @@ export const MTB_CATEGORY_GROUPS = [
 
 export type MtbGroupKey = (typeof MTB_CATEGORY_GROUPS)[number]["key"];
 
-export const RUNNING_CATEGORY_NAMES = ["JUVENIL", "LIBRE", "MASTER"] as const;
+export const RUNNING_CATEGORY_NAMES = [
+  "Sub-16",
+  "Sub-18",
+  "Sub-20",
+  "Sub-23",
+  "JUVENIL",
+  "LIBRE",
+  "MASTER",
+  "VETERANOS",
+] as const;
+
+/** Texto de edad para el catálogo Running (admin e inscripción). */
+export const RUNNING_CATEGORY_AGE_HINTS: Record<(typeof RUNNING_CATEGORY_NAMES)[number], string> = {
+  "Sub-16": "14 a 15 años",
+  "Sub-18": "16 a 17 años",
+  "Sub-20": "18 a 19 años",
+  "Sub-23": "20 a 22 años",
+  JUVENIL: "15 a 19 años",
+  LIBRE: "edad libre",
+  MASTER: "40 a 49 años",
+  VETERANOS: "50 años en adelante",
+};
 
 export const RUNNING_CATEGORY_GROUPS = [
   {
