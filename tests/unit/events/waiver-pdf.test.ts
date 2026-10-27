@@ -18,7 +18,10 @@ describe("carta de exoneración", () => {
     });
     expect(lines.join("\n")).toContain("Carrera Norte");
     expect(lines.join("\n")).toContain("Ana López");
-    expect(lines.join("\n")).toContain("CARTA DE EXONERACIÓN");
+    expect(lines.join("\n")).toContain("CARTA DE CONSENTIMIENTO Y EXONERACIÓN DE RESPONSABILIDAD");
+    expect(lines.join("\n")).toContain("Asunción de Riesgos:");
+    expect(lines.join("\n")).toContain("Derechos de Imagen y Video:");
+    expect(lines.join("\n")).toContain("NOMBRE Y FIRMA DE CONFORMIDAD");
   });
 
   it("genera un PDF descargable", () => {
