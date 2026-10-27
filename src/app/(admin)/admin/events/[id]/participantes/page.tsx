@@ -29,6 +29,13 @@ export default async function EventParticipantsPage({ params }: { params: Promis
           <h1>Participantes</h1>
           <p className="lede">Inscripciones activas del evento.</p>
         </div>
+        {rows.length > 0 ? (
+          <p>
+            <a className="button" href={`/admin/events/${id}/participantes/export`}>
+              Descargar Excel
+            </a>
+          </p>
+        ) : null}
       </header>
       <EventNav eventId={id} current="/participantes" />
       <section className="card">
