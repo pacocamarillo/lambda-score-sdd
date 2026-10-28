@@ -12,7 +12,6 @@ export type AddOnInput = {
   visible?: boolean;
   includedInCompetition?: boolean;
   competitionIds?: string[] | null;
-  confirmZeroPrice?: boolean;
 };
 
 async function assertEventOwned(eventId: string, organizationId: string) {
@@ -43,19 +42,13 @@ export async function saveAddOn(
   organizationId: string,
   input: AddOnInput,
   addOnId?: string,
-): Promise<ActionResult<{ addOnId: string; warnHistory?: boolean; confirmZeroPrice?: boolean }>> {
+): Promise<ActionResult<{ addOnId: string; warnHistory?: boolean }>> {
   const event = await assertEventOwned(eventId, organizationId);
   if (!event) return { ok: false, message: "No se encontró el evento." };
 
   const name = input.name.trim();
   if (!name) return { ok: false, message: "El adicional necesita un nombre." };
   if (input.priceCents < 0) return { ok: false, message: "El precio no puede ser negativo." };
-  if (input.priceCents === 0 && !input.includedInCompetition && !input.confirmZeroPrice) {
-    return {
-      ok: false,
-      message: "Confirma guardar un adicional a precio cero sin marcarlo como incluido.",
-    };
-  }
 
   const db = getDb();
   let warnHistory = false;

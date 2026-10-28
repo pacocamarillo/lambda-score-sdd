@@ -40,7 +40,6 @@ export default async function EventAddOnsPage({
       required: formData.get("required") === "on",
       visible: formData.get("visible") !== "off",
       includedInCompetition: formData.get("includedInCompetition") === "on",
-      confirmZeroPrice: formData.get("confirmZeroPrice") === "on",
     });
     if (!result.ok) {
       redirect(`/admin/events/${id}/adicionales?error=${encodeURIComponent(result.message)}`);
@@ -174,10 +173,6 @@ export default async function EventAddOnsPage({
             <label className="switch-row">
               <input name="includedInCompetition" type="checkbox" />
               Incluido en la competencia
-            </label>
-            <label className="switch-row">
-              <input name="confirmZeroPrice" type="checkbox" />
-              Confirmo precio cero sin incluirlo
             </label>
             <button type="submit">Guardar adicional</button>
           </form>
