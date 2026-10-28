@@ -10,7 +10,7 @@ export default async function EventAddOnsPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string; warn?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; warn?: string; edit?: string }>;
 }) {
   const session = await auth();
   if (!session?.organizationId) redirect("/admin/elegir");
@@ -20,6 +20,7 @@ export default async function EventAddOnsPage({
   if (!event) redirect("/admin/events");
   const items = await listAddOns(id);
   const canEdit = session.role === "owner" || session.role === "admin";
+  const editing = query.edit ? items.find((item) => item.id === query.edit) : undefined;
 
   async function save(formData: FormData) {
     "use server";
@@ -42,7 +43,8 @@ export default async function EventAddOnsPage({
       includedInCompetition: formData.get("includedInCompetition") === "on",
     });
     if (!result.ok) {
-      redirect(`/admin/events/${id}/adicionales?error=${encodeURIComponent(result.message)}`);
+      const editQuery = addOnId ? `&edit=${encodeURIComponent(addOnId)}` : "";
+      redirect(`/admin/events/${id}/adicionales?error=${encodeURIComponent(result.message)}${editQuery}`);
     }
     const warn = "warnHistory" in result && result.warnHistory ? "&warn=1" : "";
     redirect(`/admin/events/${id}/adicionales?saved=1${warn}`);
@@ -88,6 +90,7 @@ export default async function EventAddOnsPage({
       {query.warn ? (
         <p className="banner">Este adicional ya tiene elecciones. Los cambios afectan reportes e historial.</p>
       ) : null}
+      {query.edit && !editing ? <p className="error">No se encontró el adicional a editar.</p> : null}
 
       <section className="card">
         {items.length === 0 ? (
@@ -117,6 +120,7 @@ export default async function EventAddOnsPage({
                     <td>
                       {canEdit ? (
                         <div className="inline-actions">
+                          <Link href={`/admin/events/${id}/adicionales?edit=${item.id}`}>Editar</Link>
                           {item.visible ? (
                             <form action={hide}>
                               <input type="hidden" name="addOnId" value={item.id} />
@@ -144,34 +148,54 @@ export default async function EventAddOnsPage({
 
       {canEdit ? (
         <section className="card">
-          <h2>Agregar adicional</h2>
-          <form action={save} className="stack">
+          <h2>{editing ? "Editar adicional" : "Agregar adicional"}</h2>
+          <form action={save} className="stack" key={editing?.id ?? "new"}>
+            {editing ? <input type="hidden" name="addOnId" value={editing.id} /> : null}
+            {editing && !editing.visible ? <input type="hidden" name="visible" value="off" /> : null}
             <label>
               Nombre
-              <input name="name" required placeholder="Playera" />
+              <input name="name" required placeholder="Playera" defaultValue={editing?.name ?? ""} />
             </label>
             <label>
               Opciones (separadas por coma)
-              <input name="options" placeholder="S, M, L" />
+              <input
+                name="options"
+                placeholder="S, M, L"
+                defaultValue={editing?.options?.join(", ") ?? ""}
+              />
             </label>
             <label>
               Precio (MXN)
-              <input name="price" type="number" min={0} step="0.01" defaultValue={0} />
+              <input
+                name="price"
+                type="number"
+                min={0}
+                step="0.01"
+                defaultValue={editing ? (editing.priceCents / 100).toFixed(2) : 0}
+              />
             </label>
             <label>
               Stock
-              <input name="stock" type="number" min={0} defaultValue={50} />
+              <input name="stock" type="number" min={0} defaultValue={editing?.stock ?? 50} />
             </label>
             <label className="switch-row">
-              <input name="unlimitedStock" type="checkbox" />
+              <input
+                name="unlimitedStock"
+                type="checkbox"
+                defaultChecked={editing ? editing.stock == null : false}
+              />
               Stock ilimitado
             </label>
             <label className="switch-row">
-              <input name="required" type="checkbox" />
+              <input name="required" type="checkbox" defaultChecked={editing?.required ?? false} />
               Obligatorio
             </label>
             <label className="switch-row">
-              <input name="includedInCompetition" type="checkbox" />
+              <input
+                name="includedInCompetition"
+                type="checkbox"
+                defaultChecked={editing?.includedInCompetition ?? false}
+              />
               Incluido en la competencia
             </label>
             <button type="submit">Guardar adicional</button>
