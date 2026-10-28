@@ -4,9 +4,37 @@ const MIN_HEIGHT = 630;
 const TARGET_RATIO = MIN_WIDTH / MIN_HEIGHT;
 const RATIO_TOLERANCE = 0.1;
 
+const MIME_BY_EXT = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  gif: "image/gif",
+} as const;
+
 export type EventImageCheck =
   | { ok: true; ext: "png" | "jpg" | "gif"; width: number; height: number }
   | { ok: false; message: string };
+
+/** Guarda la imagen embebida para que sobreviva en Vercel (sin disco persistente). */
+export function toEventImageDataUrl(bytes: Uint8Array, ext: keyof typeof MIME_BY_EXT): string {
+  return `data:${MIME_BY_EXT[ext]};base64,${Buffer.from(bytes).toString("base64")}`;
+}
+
+export function parseEventImageDataUrl(
+  imageKey: string,
+): { contentType: string; bytes: Buffer } | null {
+  const match = /^data:(image\/(?:png|jpeg|gif));base64,([A-Za-z0-9+/=\s]+)$/i.exec(imageKey.trim());
+  if (!match) return null;
+  return {
+    contentType: match[1]!.toLowerCase(),
+    bytes: Buffer.from(match[2]!.replace(/\s+/g, ""), "base64"),
+  };
+}
+
+export function eventBannerPath(eventId: string, imageKey: string | null | undefined): string | null {
+  if (!imageKey) return null;
+  const version = encodeURIComponent(imageKey.slice(-24));
+  return `/eventos/${eventId}/banner?v=${version}`;
+}
 
 export function validateEventImage(bytes: Uint8Array): EventImageCheck {
   if (bytes.byteLength === 0) {

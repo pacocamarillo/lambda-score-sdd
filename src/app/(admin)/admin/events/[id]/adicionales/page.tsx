@@ -33,22 +33,15 @@ export default async function EventAddOnsPage({
       .map((part) => part.trim())
       .filter(Boolean);
     const unlimited = formData.get("unlimitedStock") === "on";
-    const addOnId = String(formData.get("addOnId") ?? "").trim() || undefined;
-    const result = await saveAddOn(
-      id,
-      current.organizationId,
-      {
-        name: String(formData.get("name") ?? ""),
-        options,
-        priceCents: Math.round(Number(formData.get("price") ?? 0) * 100),
-        stock: unlimited ? null : Number(formData.get("stock") ?? 0),
-        required: formData.get("required") === "on",
-        visible: formData.get("visible") !== "off",
-        includedInCompetition: formData.get("includedInCompetition") === "on",
-        confirmZeroPrice: formData.get("confirmZeroPrice") === "on",
-      },
-      addOnId,
-    );
+    const result = await saveAddOn(id, current.organizationId, {
+      name: String(formData.get("name") ?? ""),
+      options,
+      priceCents: Math.round(Number(formData.get("price") ?? 0) * 100),
+      stock: unlimited ? null : Number(formData.get("stock") ?? 0),
+      required: formData.get("required") === "on",
+      visible: formData.get("visible") !== "off",
+      includedInCompetition: formData.get("includedInCompetition") === "on",
+    });
     if (!result.ok) {
       const editQuery = addOnId ? `&edit=${encodeURIComponent(addOnId)}` : "";
       redirect(`/admin/events/${id}/adicionales?error=${encodeURIComponent(result.message)}${editQuery}`);
@@ -205,22 +198,7 @@ export default async function EventAddOnsPage({
               />
               Incluido en la competencia
             </label>
-            <label className="switch-row">
-              <input
-                name="confirmZeroPrice"
-                type="checkbox"
-                defaultChecked={Boolean(editing && editing.priceCents === 0 && !editing.includedInCompetition)}
-              />
-              Confirmo precio cero sin incluirlo
-            </label>
-            <div className="inline-actions">
-              <button type="submit">{editing ? "Guardar cambios" : "Guardar adicional"}</button>
-              {editing ? (
-                <Link href={`/admin/events/${id}/adicionales`} className="ghost">
-                  Cancelar
-                </Link>
-              ) : null}
-            </div>
+            <button type="submit">Guardar adicional</button>
           </form>
         </section>
       ) : null}

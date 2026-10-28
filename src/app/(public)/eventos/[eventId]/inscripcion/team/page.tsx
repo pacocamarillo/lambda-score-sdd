@@ -69,7 +69,7 @@ export default async function TeamInscripcionPage({
 
   if (query.ok) {
     return (
-      <div className="stack auth-card">
+      <div className="stack register-page">
         <h1>Equipo inscrito</h1>
         <p className="lede">
           {query.status === "confirmed"
@@ -87,7 +87,7 @@ export default async function TeamInscripcionPage({
   }
 
   return (
-    <div className="stack auth-card">
+    <div className="stack register-page">
       <header>
         <p className="hint">
           <Link href={`/eventos/${eventId}`}>{event.name}</Link>
@@ -104,77 +104,87 @@ export default async function TeamInscripcionPage({
       {comps.length === 0 ? (
         <p className="empty">No hay competencias de equipo en este evento.</p>
       ) : (
-        <form action={submit} className="stack card">
-          <label>
-            Competencia
-            <select name="competitionId" defaultValue={selectedId} required>
-              {comps.map((competition) => (
-                <option key={competition.id} value={competition.id} disabled={competition.full}>
-                  {competition.name}
-                  {competition.full ? " (sin cupo)" : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-          <input type="hidden" name="memberCount" value={slots} />
-          <label>
-            Nombre del equipo
-            <input name="teamName" required={Boolean(selected?.teamNameRequired)} />
-          </label>
+        <form action={submit} className="stack register-form">
+          <div className="register-grid">
+            <label className="full">
+              Competencia
+              <select name="competitionId" defaultValue={selectedId} required>
+                {comps.map((competition) => (
+                  <option key={competition.id} value={competition.id} disabled={competition.full}>
+                    {competition.name}
+                    {competition.full ? " (sin cupo)" : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <input type="hidden" name="memberCount" value={slots} />
+            <label className="full">
+              Nombre del equipo
+              <input name="teamName" required={Boolean(selected?.teamNameRequired)} />
+            </label>
+          </div>
 
           {Array.from({ length: slots }, (_, index) => (
             <fieldset key={index} className="stack">
               <legend>Integrante {index + 1}</legend>
-              <label>
-                Nombre
-                <input name={`firstName_${index}`} required />
-              </label>
-              <label>
-                Apellido
-                <input name={`lastName_${index}`} required />
-              </label>
-              <label>
-                Género
-                <select name={`gender_${index}`} required defaultValue="">
-                  <option value="" disabled>
-                    Elige
-                  </option>
-                  <option value="male">Varonil</option>
-                  <option value="female">Femenil</option>
-                </select>
-              </label>
-              <label>
-                Fecha de nacimiento
-                <input name={`birthDate_${index}`} type="date" required />
-              </label>
-              <label>
-                Correo
-                <input name={`email_${index}`} type="email" required />
-              </label>
+              <div className="register-grid">
+                <label>
+                  Nombre
+                  <input name={`firstName_${index}`} required autoComplete="given-name" />
+                </label>
+                <label>
+                  Apellido
+                  <input name={`lastName_${index}`} required autoComplete="family-name" />
+                </label>
+                <label>
+                  Género
+                  <select name={`gender_${index}`} required defaultValue="">
+                    <option value="" disabled>
+                      Elige
+                    </option>
+                    <option value="male">Varonil</option>
+                    <option value="female">Femenil</option>
+                  </select>
+                </label>
+                <label>
+                  Fecha de nacimiento
+                  <input name={`birthDate_${index}`} type="date" required />
+                </label>
+                <label className="full">
+                  Correo
+                  <input name={`email_${index}`} type="email" required autoComplete="email" inputMode="email" />
+                </label>
+              </div>
             </fieldset>
           ))}
 
-          <label className="switch-row">
-            <input name="acceptedTerms" type="checkbox" required />
-            Acepto los términos
-          </label>
-          <label className="switch-row">
-            <input name="acceptedWaiver" type="checkbox" required />
-            Acepto la carta de exoneración
-          </label>
-          <WaiverDownloadButton
-            eventId={eventId}
-            fields={{
-              firstName: "firstName_0",
-              lastName: "lastName_0",
-              birthDate: "birthDate_0",
-              email: "email_0",
-              competitionId: "competitionId",
-              gender: "gender_0",
-            }}
-          />
-          <p className="hint">El PDF usa los datos del evento y del primer integrante capturado.</p>
-          <button type="submit">Inscribir equipo</button>
+          <div className="register-grid">
+            <label className="switch-row full">
+              <input name="acceptedTerms" type="checkbox" required />
+              Acepto los términos
+            </label>
+            <label className="switch-row full">
+              <input name="acceptedWaiver" type="checkbox" required />
+              Acepto la carta de exoneración
+            </label>
+            <div className="register-actions full">
+              <div className="stack">
+                <WaiverDownloadButton
+                  eventId={eventId}
+                  fields={{
+                    firstName: "firstName_0",
+                    lastName: "lastName_0",
+                    birthDate: "birthDate_0",
+                    email: "email_0",
+                    competitionId: "competitionId",
+                    gender: "gender_0",
+                  }}
+                />
+                <p className="hint">El PDF usa los datos del evento y del primer integrante capturado.</p>
+              </div>
+              <button type="submit">Inscribir equipo</button>
+            </div>
+          </div>
         </form>
       )}
     </div>

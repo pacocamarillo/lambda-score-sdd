@@ -12,17 +12,33 @@ describe("elegibilidad de categorías", () => {
   });
 
   it("filtra MTB por edad", () => {
+    expect(optionEligibleForAge("INFANTIL A", 9, "mtb")).toBe(true);
+    expect(optionEligibleForAge("INFANTIL A", 8, "mtb")).toBe(false);
     expect(optionEligibleForAge("JUVENIL B", 15, "mtb")).toBe(true);
     expect(optionEligibleForAge("JUVENIL B", 17, "mtb")).toBe(false);
+    expect(optionEligibleForAge("JUVENIL C", 19, "mtb")).toBe(true);
+    expect(optionEligibleForAge("MASTER 20", 19, "mtb")).toBe(false);
+    expect(optionEligibleForAge("MASTER 20", 20, "mtb")).toBe(true);
     expect(optionEligibleForAge("MASTER 40", 42, "mtb")).toBe(true);
     expect(optionEligibleForAge("MASTER 70", 72, "mtb")).toBe(true);
+    expect(optionEligibleForAge("ELITE", 12, "mtb")).toBe(true);
+    expect(optionEligibleForAge("PRINCIPIANTES", 40, "mtb")).toBe(true);
+    expect(optionEligibleForAge("PRINCIPAINTE", 40, "mtb")).toBe(true);
   });
 
   it("filtra running por edad", () => {
+    expect(optionEligibleForAge("Sub-16", 14, "running")).toBe(true);
+    expect(optionEligibleForAge("Sub-16", 16, "running")).toBe(false);
+    expect(optionEligibleForAge("Sub-18", 16, "running")).toBe(true);
+    expect(optionEligibleForAge("Sub-23", 22, "running")).toBe(true);
     expect(optionEligibleForAge("JUVENIL", 16, "running")).toBe(true);
+    expect(optionEligibleForAge("JUVENIL", 20, "running")).toBe(false);
     expect(optionEligibleForAge("LIBRE", 25, "running")).toBe(true);
+    expect(optionEligibleForAge("LIBRE", 12, "running")).toBe(true);
     expect(optionEligibleForAge("MASTER", 41, "running")).toBe(true);
-    expect(optionEligibleForAge("MASTER", 30, "running")).toBe(false);
+    expect(optionEligibleForAge("MASTER", 50, "running")).toBe(false);
+    expect(optionEligibleForAge("VETERANOS", 50, "running")).toBe(true);
+    expect(optionEligibleForAge("VETERANOS", 49, "running")).toBe(false);
   });
 
   it("oculta categorías varoniles a una mujer", () => {
