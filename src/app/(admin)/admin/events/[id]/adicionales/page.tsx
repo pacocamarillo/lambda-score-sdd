@@ -33,15 +33,22 @@ export default async function EventAddOnsPage({
       .map((part) => part.trim())
       .filter(Boolean);
     const unlimited = formData.get("unlimitedStock") === "on";
-    const result = await saveAddOn(id, current.organizationId, {
-      name: String(formData.get("name") ?? ""),
-      options,
-      priceCents: Math.round(Number(formData.get("price") ?? 0) * 100),
-      stock: unlimited ? null : Number(formData.get("stock") ?? 0),
-      required: formData.get("required") === "on",
-      visible: formData.get("visible") !== "off",
-      includedInCompetition: formData.get("includedInCompetition") === "on",
-    });
+    const rawAddOnId = String(formData.get("addOnId") ?? "").trim();
+    const addOnId = rawAddOnId || undefined;
+    const result = await saveAddOn(
+      id,
+      current.organizationId,
+      {
+        name: String(formData.get("name") ?? ""),
+        options,
+        priceCents: Math.round(Number(formData.get("price") ?? 0) * 100),
+        stock: unlimited ? null : Number(formData.get("stock") ?? 0),
+        required: formData.get("required") === "on",
+        visible: formData.get("visible") !== "off",
+        includedInCompetition: formData.get("includedInCompetition") === "on",
+      },
+      addOnId,
+    );
     if (!result.ok) {
       const editQuery = addOnId ? `&edit=${encodeURIComponent(addOnId)}` : "";
       redirect(`/admin/events/${id}/adicionales?error=${encodeURIComponent(result.message)}${editQuery}`);
