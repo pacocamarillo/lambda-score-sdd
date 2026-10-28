@@ -40,9 +40,14 @@ const MTB_AGE_RANGES: Record<(typeof MTB_CATEGORY_NAMES)[number], AgeRange> = {
 };
 
 const RUNNING_AGE_RANGES: Record<(typeof RUNNING_CATEGORY_NAMES)[number], AgeRange> = {
-  JUVENIL: { min: 0, max: 17 },
-  LIBRE: { min: 18, max: 39 },
-  MASTER: { min: 40, max: null },
+  "Sub-16": { min: 14, max: 15 },
+  "Sub-18": { min: 16, max: 17 },
+  "Sub-20": { min: 18, max: 19 },
+  "Sub-23": { min: 20, max: 22 },
+  JUVENIL: { min: 15, max: 19 },
+  LIBRE: { min: 0, max: null },
+  MASTER: { min: 40, max: 49 },
+  VETERANOS: { min: 50, max: null },
 };
 
 function inAgeRange(age: number, range: AgeRange): boolean {

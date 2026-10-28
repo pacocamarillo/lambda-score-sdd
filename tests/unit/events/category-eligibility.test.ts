@@ -19,10 +19,18 @@ describe("elegibilidad de categorías", () => {
   });
 
   it("filtra running por edad", () => {
+    expect(optionEligibleForAge("Sub-16", 14, "running")).toBe(true);
+    expect(optionEligibleForAge("Sub-16", 16, "running")).toBe(false);
+    expect(optionEligibleForAge("Sub-18", 16, "running")).toBe(true);
+    expect(optionEligibleForAge("Sub-23", 22, "running")).toBe(true);
     expect(optionEligibleForAge("JUVENIL", 16, "running")).toBe(true);
+    expect(optionEligibleForAge("JUVENIL", 20, "running")).toBe(false);
     expect(optionEligibleForAge("LIBRE", 25, "running")).toBe(true);
+    expect(optionEligibleForAge("LIBRE", 12, "running")).toBe(true);
     expect(optionEligibleForAge("MASTER", 41, "running")).toBe(true);
-    expect(optionEligibleForAge("MASTER", 30, "running")).toBe(false);
+    expect(optionEligibleForAge("MASTER", 50, "running")).toBe(false);
+    expect(optionEligibleForAge("VETERANOS", 50, "running")).toBe(true);
+    expect(optionEligibleForAge("VETERANOS", 49, "running")).toBe(false);
   });
 
   it("oculta categorías varoniles a una mujer", () => {
