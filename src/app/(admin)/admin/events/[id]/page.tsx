@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { listCompetitions } from "@/modules/events/competitions";
 import { deleteEvent, getOwnedEvent, updateEvent } from "@/modules/events/crud";
-import { validateEventImage } from "@/modules/events/event-image";
+import { eventBannerPath, toEventImageDataUrl, validateEventImage } from "@/modules/events/event-image";
 import {
   cancelEvent,
   describePublishBlockers,
@@ -53,13 +53,18 @@ export default async function EventEditPage({
       const bytes = new Uint8Array(await imageFile.arrayBuffer());
       const checked = validateEventImage(bytes);
       if (!checked.ok) redirect(`/admin/events/${id}?error=${encodeURIComponent(checked.message)}`);
-      const directory = path.join(process.cwd(), "public", "uploads", "events");
-      await mkdir(directory, { recursive: true });
-      await writeFile(path.join(directory, `${id}.${checked.ext}`), bytes);
-      for (const ext of ["png", "jpg", "gif"] as const) {
-        if (ext !== checked.ext) await rm(path.join(directory, `${id}.${ext}`), { force: true });
+      // Persist in DB as data URL so the public banner works on Vercel (no durable local disk).
+      imageKey = toEventImageDataUrl(bytes, checked.ext);
+      try {
+        const directory = path.join(process.cwd(), "public", "uploads", "events");
+        await mkdir(directory, { recursive: true });
+        await writeFile(path.join(directory, `${id}.${checked.ext}`), bytes);
+        for (const ext of ["png", "jpg", "gif"] as const) {
+          if (ext !== checked.ext) await rm(path.join(directory, `${id}.${ext}`), { force: true });
+        }
+      } catch {
+        // Optional local cache; ignore failures on read-only hosts.
       }
-      imageKey = `/uploads/events/${id}.${checked.ext}?v=${Date.now()}`;
     }
     const result = await updateEvent(id, current.organizationId, {
       name: String(formData.get("name") ?? ""),
@@ -257,7 +262,17 @@ export default async function EventEditPage({
             Dimensiones recomendadas: 1200×630 px (proporción 1.91:1) o superior, manteniendo una
             proporción similar. Máximo 3 MB. PNG, JPG o GIF.
           </p>
-          {event.imageKey ? <img className="event-cover" src={event.imageKey} alt={event.name} /> : null}
+          {event.imageKey ? (
+            <img
+              className="event-cover"
+              src={
+                event.imageKey.startsWith("data:")
+                  ? event.imageKey
+                  : (eventBannerPath(id, event.imageKey) ?? event.imageKey)
+              }
+              alt={event.name}
+            />
+          ) : null}
           <label>
             Descripción
             <textarea name="description" defaultValue={event.description} disabled={!canEdit} />
