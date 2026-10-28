@@ -109,6 +109,13 @@ export default async function EventParticipantsPage({
           <h1>Participantes</h1>
           <p className="lede">Inscripciones del evento con todos los datos capturados.</p>
         </div>
+        {rows.length > 0 ? (
+          <p>
+            <a className="button" href={`/admin/events/${id}/participantes/export`}>
+              Descargar Excel
+            </a>
+          </p>
+        ) : null}
       </header>
       <EventNav eventId={id} current="/participantes" />
       {query.error ? <p className="error">{query.error}</p> : null}
