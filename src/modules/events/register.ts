@@ -6,7 +6,7 @@ import { assignBib } from "@/modules/events/bib";
 import { capacityAvailable, countActiveRegistrations } from "@/modules/events/capacity";
 import { registrationIsOpen } from "@/modules/events/crud";
 import { GENDER_ANSWER_KEY, parseGender } from "@/modules/events/category-eligibility";
-import { listFormFields, validateCustomAnswers } from "@/modules/events/form";
+import { fieldsForCompetition, listFormFields, validateCustomAnswers } from "@/modules/events/form";
 import type { ActionResult, DocumentType, ParticipantGender, ParticipantInput } from "@/modules/events/types";
 
 const DOCUMENT_TYPES: DocumentType[] = ["ine", "curp", "rfc", "other"];
@@ -180,7 +180,126 @@ export async function listEventRegistrations(eventId: string, organizationId: st
   return rows.map((row) => ({
     ...row,
     competitionName: byId.get(row.competitionId)?.name ?? "",
+    gender: parseGender(row.answers?.[GENDER_ANSWER_KEY]) as ParticipantGender | null,
   }));
+}
+
+export async function getEventRegistration(
+  eventId: string,
+  organizationId: string,
+  registrationId: string,
+) {
+  const rows = await listEventRegistrations(eventId, organizationId);
+  return rows.find((row) => row.id === registrationId) ?? null;
+}
+
+export type AdminRegistrationUpdate = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  gender: ParticipantGender;
+  documentType: DocumentType;
+  documentNumber: string;
+  competitionId: string;
+  answers: Record<string, unknown>;
+  status?: "pending_payment" | "confirmed" | "cancelled";
+};
+
+/** Actualiza una inscripción desde el panel; el organizador puede corregir categoría y datos. */
+export async function updateEventRegistration(
+  eventId: string,
+  organizationId: string,
+  registrationId: string,
+  input: AdminRegistrationUpdate,
+): Promise<ActionResult> {
+  const participant = parseParticipant({
+    email: input.email,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    birthDate: input.birthDate,
+    gender: input.gender,
+    documentType: input.documentType,
+    documentNumber: input.documentNumber,
+    answers: input.answers,
+  });
+  if (!participant.ok) return participant;
+
+  const db = getDb();
+  const [event] = await db.select().from(events).where(eq(events.id, eventId)).limit(1);
+  if (!event || event.organizationId !== organizationId) {
+    return { ok: false, message: "No se encontró el evento." };
+  }
+
+  const existing = await getEventRegistration(eventId, organizationId, registrationId);
+  if (!existing) return { ok: false, message: "No se encontró la inscripción." };
+
+  const [competition] = await db
+    .select()
+    .from(competitions)
+    .where(and(eq(competitions.id, input.competitionId), eq(competitions.eventId, eventId)))
+    .limit(1);
+  if (!competition) return { ok: false, message: "No se encontró la competencia." };
+
+  if (input.competitionId !== existing.competitionId) {
+    const used = await countActiveRegistrations(db, input.competitionId);
+    if (!capacityAvailable(competition.capacity, used)) {
+      return { ok: false, message: "Esta competencia ya no tiene cupo." };
+    }
+  }
+
+  const fields = fieldsForCompetition(await listFormFields(eventId), input.competitionId);
+  const cleanedAnswers: Record<string, unknown> = {};
+  for (const field of fields) {
+    if (field.fieldType === "heading") continue;
+    const raw = input.answers[field.id];
+    const empty =
+      raw == null ||
+      (typeof raw === "string" && raw.trim() === "") ||
+      (Array.isArray(raw) && raw.length === 0);
+    if (field.required && empty) {
+      return { ok: false, message: `Falta completar: ${field.label}.` };
+    }
+    if (empty) continue;
+    if (field.fieldType === "number") {
+      const number = Number(raw);
+      if (Number.isNaN(number)) return { ok: false, message: `${field.label} debe ser un número.` };
+      cleanedAnswers[field.id] = number;
+    } else if (field.fieldType === "select" || field.fieldType === "radio") {
+      const value = String(raw);
+      if (field.options.length > 0 && !field.options.includes(value)) {
+        return { ok: false, message: `Opción no válida en ${field.label}.` };
+      }
+      cleanedAnswers[field.id] = value;
+    } else {
+      cleanedAnswers[field.id] = String(raw).trim();
+    }
+  }
+
+  const status = input.status ?? existing.status;
+  if (status !== "pending_payment" && status !== "confirmed" && status !== "cancelled") {
+    return { ok: false, message: "Estado de inscripción no válido." };
+  }
+
+  await db
+    .update(registrations)
+    .set({
+      competitionId: input.competitionId,
+      email: participant.email,
+      firstName: participant.firstName,
+      lastName: participant.lastName,
+      birthDate: new Date(`${participant.birthDate}T12:00:00`),
+      documentType: participant.documentType,
+      documentNumber: participant.documentNumber,
+      status,
+      answers: {
+        ...cleanedAnswers,
+        [GENDER_ANSWER_KEY]: participant.gender,
+      },
+    })
+    .where(eq(registrations.id, registrationId));
+
+  return { ok: true };
 }
 
 /** Exportado para pruebas de cupo sin UI. */
