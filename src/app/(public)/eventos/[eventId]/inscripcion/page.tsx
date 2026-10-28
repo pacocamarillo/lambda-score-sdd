@@ -36,13 +36,26 @@ export default async function InscripcionPage({
     );
   }
 
-  const comps = (await listCompetitionsWithAvailability(eventId)).filter((c) => c.mode === "individual");
-  const selectedId = query.competitionId ?? comps[0]?.id ?? "";
-  const selected = comps.find((c) => c.id === selectedId) ?? null;
+  const allComps = await listCompetitionsWithAvailability(eventId);
+  const individualComps = allComps.filter((c) => c.mode === "individual");
+  const teamComps = allComps.filter((c) => c.mode === "team");
+  const selectedId = query.competitionId ?? individualComps[0]?.id ?? teamComps[0]?.id ?? "";
+  const selectedAll = allComps.find((c) => c.id === selectedId) ?? null;
+  if (selectedAll?.mode === "team") {
+    redirect(`/eventos/${eventId}/inscripcion/team?competitionId=${encodeURIComponent(selectedAll.id)}`);
+  }
+  const selected = individualComps.find((c) => c.id === selectedId) ?? null;
   const fields = selected ? fieldsForCompetition(await listFormFields(eventId), selected.id) : [];
   const addOns = selected
     ? visibleAddOnsForCompetition(await listAddOns(eventId), selected.id)
     : [];
+  const compsForForm = allComps.map((competition) => ({
+    id: competition.id,
+    name: competition.name,
+    priceCents: competition.priceCents,
+    full: competition.full,
+    mode: competition.mode as "individual" | "team",
+  }));
 
   async function submit(formData: FormData) {
     "use server";
@@ -125,19 +138,38 @@ export default async function InscripcionPage({
         <section className="card" dangerouslySetInnerHTML={{ __html: event.noticeHtml }} />
       ) : null}
 
-      {comps.length === 0 ? (
-        <p className="empty">No hay competencias individuales abiertas. Si es por equipo, usa el enlace de equipo.</p>
+      {allComps.length === 0 ? (
+        <p className="empty">No hay competencias abiertas para este evento.</p>
+      ) : individualComps.length === 0 ? (
+        <div className="stack">
+          <p className="lede">Este evento solo tiene competencias por equipo.</p>
+          <ul className="feature-list">
+            {teamComps.map((competition) => (
+              <li key={competition.id}>
+                <span>
+                  {competition.name}
+                  <span className="detail">
+                    ${(competition.priceCents / 100).toFixed(2)} MXN
+                    {competition.full ? " · Sin cupo" : ""}
+                  </span>
+                </span>
+                {competition.full ? (
+                  <span className="badge">Llena</span>
+                ) : (
+                  <Link href={`/eventos/${eventId}/inscripcion/team?competitionId=${competition.id}`}>
+                    Inscribir equipo
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <RegistrationForm
           eventId={eventId}
           eventDateIso={event.eventDate.toISOString()}
           selectedCompetitionId={selectedId}
-          competitions={comps.map((competition) => ({
-            id: competition.id,
-            name: competition.name,
-            priceCents: competition.priceCents,
-            full: competition.full,
-          }))}
+          competitions={compsForForm}
           fields={fields.map((field) => ({
             id: field.id,
             label: field.label,
@@ -155,6 +187,12 @@ export default async function InscripcionPage({
           action={submit}
         />
       )}
+      {teamComps.length > 0 && individualComps.length > 0 ? (
+        <p className="hint">
+          También puedes ir directo a{" "}
+          <Link href={`/eventos/${eventId}/inscripcion/team`}>inscripción por equipo</Link>.
+        </p>
+      ) : null}
     </div>
   );
 }
