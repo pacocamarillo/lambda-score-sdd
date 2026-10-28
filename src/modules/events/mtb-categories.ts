@@ -16,11 +16,18 @@ export {
   type MtbGroupKey,
 } from "@/modules/events/category-catalog";
 
+function normalizeMtbCategoryName(name: string): string {
+  return name.trim() === "PRINCIPAINTE" ? "PRINCIPIANTES" : name;
+}
+
 export function mtbSelectionsFromFormData(formData: FormData): Record<MtbGroupKey, string[]> {
   const result = { varonil: [] as string[], femenil: [] as string[] };
   for (const group of MTB_CATEGORY_GROUPS) {
-    const selected = formData.getAll(`mtb_${group.key}`).map(String);
-    const custom = String(formData.get(`mtb_${group.key}_custom`) ?? "");
+    const selected = formData.getAll(`mtb_${group.key}`).map(String).map(normalizeMtbCategoryName);
+    const custom = String(formData.get(`mtb_${group.key}_custom`) ?? "").replaceAll(
+      /\bPRINCIPAINTE\b/g,
+      "PRINCIPIANTES",
+    );
     result[group.key] = mergeCategoryOptions(selected, custom, MTB_CATEGORY_NAMES);
   }
   return result;
@@ -33,7 +40,7 @@ export async function loadMtbCategorySelections(eventId: string): Promise<Record
 
   for (const group of MTB_CATEGORY_GROUPS) {
     const field = fields.find((row) => row.label === group.fieldLabel);
-    result[group.key] = field?.options ?? [];
+    result[group.key] = (field?.options ?? []).map(normalizeMtbCategoryName);
   }
 
   return result;

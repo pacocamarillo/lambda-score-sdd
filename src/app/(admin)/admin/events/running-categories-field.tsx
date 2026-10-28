@@ -1,4 +1,5 @@
 import {
+  RUNNING_CATEGORY_AGE_HINTS,
   RUNNING_CATEGORY_GROUPS,
   RUNNING_CATEGORY_NAMES,
   type RunningGroupKey,
@@ -15,7 +16,7 @@ export function RunningCategoriesField({
       <legend>Categorías Running</legend>
       <p className="hint">
         Marca las del catálogo o escribe categorías nuevas, una por línea. Las nuevas también
-        aparecen en la inscripción.
+        aparecen en la inscripción. La edad se valida el día del evento.
       </p>
       {RUNNING_CATEGORY_GROUPS.map((group) => {
         const selected = new Set(selections[group.key] ?? []);
@@ -32,7 +33,10 @@ export function RunningCategoriesField({
                     value={name}
                     defaultChecked={selected.has(name)}
                   />
-                  {name}
+                  <span>
+                    {name}
+                    <span className="detail"> · {RUNNING_CATEGORY_AGE_HINTS[name]}</span>
+                  </span>
                 </label>
               ))}
             </div>

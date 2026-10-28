@@ -106,7 +106,7 @@ export default async function InscripcionPage({
 
   if (query.ok) {
     return (
-      <div className="stack auth-card">
+      <div className="stack register-page">
         <h1>Inscripción recibida</h1>
         <p className="lede">
           {query.status === "confirmed"
@@ -125,7 +125,7 @@ export default async function InscripcionPage({
   }
 
   return (
-    <div className="stack auth-card">
+    <div className="stack register-page">
       <header>
         <p className="hint">
           <Link href={`/eventos/${eventId}`}>{event.name}</Link>
