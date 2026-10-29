@@ -16,7 +16,7 @@ export default async function EventCompetitionsPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; edit?: string }>;
 }) {
   const session = await auth();
   if (!session?.organizationId) redirect("/admin/elegir");
@@ -26,6 +26,7 @@ export default async function EventCompetitionsPage({
   if (!event) redirect("/admin/events");
   const comps = await listCompetitionsWithAvailability(id);
   const canEdit = session.role === "owner" || session.role === "admin";
+  const editing = query.edit ? comps.find((competition) => competition.id === query.edit) : undefined;
 
   async function save(formData: FormData) {
     "use server";
@@ -36,6 +37,8 @@ export default async function EventCompetitionsPage({
     const unlimited = formData.get("unlimited") === "on";
     const capacityRaw = String(formData.get("capacity") ?? "");
     const mode = formData.get("mode") === "team" ? "team" : "individual";
+    const rawCompetitionId = String(formData.get("competitionId") ?? "").trim();
+    const competitionId = rawCompetitionId || undefined;
     const result = await saveCompetition(
       id,
       current.organizationId,
@@ -51,10 +54,11 @@ export default async function EventCompetitionsPage({
         bibColor: String(formData.get("bibColor") ?? "") || null,
         cashOnEvent: false,
       },
-      String(formData.get("competitionId") ?? "") || undefined,
+      competitionId,
     );
     if (!result.ok) {
-      redirect(`/admin/events/${id}/competitions?error=${encodeURIComponent(result.message)}`);
+      const editQuery = competitionId ? `&edit=${encodeURIComponent(competitionId)}` : "";
+      redirect(`/admin/events/${id}/competitions?error=${encodeURIComponent(result.message)}${editQuery}`);
     }
     redirect(`/admin/events/${id}/competitions?saved=1`);
   }
@@ -87,6 +91,7 @@ export default async function EventCompetitionsPage({
       <EventNav eventId={id} current="/competitions" />
       {query.error ? <p className="error">{query.error}</p> : null}
       {query.saved ? <p className="notice">Cambios guardados.</p> : null}
+      {query.edit && !editing ? <p className="error">No se encontró la competencia a editar.</p> : null}
 
       <section className="card">
         {comps.length === 0 ? (
@@ -118,12 +123,15 @@ export default async function EventCompetitionsPage({
                     <td>{competition.mode === "team" ? "Equipo" : "Individual"}</td>
                     <td>
                       {canEdit ? (
-                        <form action={remove}>
-                          <input type="hidden" name="competitionId" value={competition.id} />
-                          <button type="submit" className="ghost">
-                            Eliminar
-                          </button>
-                        </form>
+                        <div className="inline-actions">
+                          <Link href={`/admin/events/${id}/competitions?edit=${competition.id}`}>Editar</Link>
+                          <form action={remove}>
+                            <input type="hidden" name="competitionId" value={competition.id} />
+                            <button type="submit" className="ghost">
+                              Eliminar
+                            </button>
+                          </form>
+                        </div>
                       ) : null}
                     </td>
                   </tr>
@@ -136,52 +144,85 @@ export default async function EventCompetitionsPage({
 
       {canEdit ? (
         <section className="card">
-          <h2>Agregar competencia</h2>
-          <form action={save} className="stack">
+          <h2>{editing ? "Editar competencia" : "Agregar competencia"}</h2>
+          <form action={save} className="stack" key={editing?.id ?? "new"}>
+            {editing ? <input type="hidden" name="competitionId" value={editing.id} /> : null}
             <label>
               Nombre
-              <input name="name" required placeholder="10K" />
+              <input name="name" required placeholder="10K" defaultValue={editing?.name ?? ""} />
             </label>
             <label>
               Precio (MXN)
-              <input name="price" type="number" min={0} step="0.01" defaultValue={0} required />
+              <input
+                name="price"
+                type="number"
+                min={0}
+                step="0.01"
+                defaultValue={editing ? (editing.priceCents / 100).toFixed(2) : 0}
+                required
+              />
             </label>
             <label>
               Cupo
-              <input name="capacity" type="number" min={0} defaultValue={100} />
+              <input
+                name="capacity"
+                type="number"
+                min={0}
+                defaultValue={editing?.capacity ?? 100}
+              />
             </label>
             <label className="switch-row">
-              <input name="unlimited" type="checkbox" />
+              <input
+                name="unlimited"
+                type="checkbox"
+                defaultChecked={editing ? editing.capacity == null : false}
+              />
               Cupo ilimitado
             </label>
             <label>
               Modo
-              <select name="mode" defaultValue="individual">
+              <select name="mode" defaultValue={editing?.mode ?? "individual"}>
                 <option value="individual">Individual</option>
                 <option value="team">Equipo</option>
               </select>
             </label>
             <label>
               Mínimo de integrantes (equipo)
-              <input name="teamMinSize" type="number" min={2} defaultValue={2} />
+              <input
+                name="teamMinSize"
+                type="number"
+                min={2}
+                defaultValue={editing?.teamMinSize ?? 2}
+              />
             </label>
             <label className="switch-row">
-              <input name="teamNameRequired" type="checkbox" />
+              <input
+                name="teamNameRequired"
+                type="checkbox"
+                defaultChecked={editing?.teamNameRequired ?? false}
+              />
               Nombre de equipo obligatorio
             </label>
             <label>
               Precio de equipo
-              <select name="priceMode" defaultValue="per_person">
+              <select name="priceMode" defaultValue={editing?.priceMode ?? "per_person"}>
                 <option value="per_person">Por persona</option>
                 <option value="per_team">Por equipo</option>
               </select>
             </label>
-            <IncludedItemsField />
+            <IncludedItemsField initialValue={editing?.includedItems} />
             <label>
               Color de folio
-              <input name="bibColor" placeholder="#ff6600" />
+              <input name="bibColor" placeholder="#ff6600" defaultValue={editing?.bibColor ?? ""} />
             </label>
-            <button type="submit">Guardar competencia</button>
+            <div className="inline-actions">
+              <button type="submit">{editing ? "Guardar cambios" : "Guardar competencia"}</button>
+              {editing ? (
+                <Link className="button ghost" href={`/admin/events/${id}/competitions`}>
+                  Cancelar
+                </Link>
+              ) : null}
+            </div>
           </form>
         </section>
       ) : null}

@@ -66,12 +66,14 @@ export default async function EventEditPage({
         // Optional local cache; ignore failures on read-only hosts.
       }
     }
+    const currentEvent = await getOwnedEvent(id, current.organizationId);
+    if (!currentEvent) redirect("/admin/events");
     const result = await updateEvent(id, current.organizationId, {
       name: String(formData.get("name") ?? ""),
       venue: String(formData.get("venue") ?? ""),
       eventDate: new Date(String(formData.get("eventDate") ?? "")),
       description: String(formData.get("description") ?? ""),
-      noticeHtml: String(formData.get("noticeHtml") ?? "") || null,
+      noticeHtml: currentEvent.noticeHtml,
       registrationDeadline: deadlineRaw ? new Date(deadlineRaw) : null,
       isFree: formData.get("isFree") === "on",
       bibScope: formData.get("bibScope") === "event" ? "event" : "competition",
@@ -276,10 +278,6 @@ export default async function EventEditPage({
           <label>
             Descripción
             <textarea name="description" defaultValue={event.description} disabled={!canEdit} />
-          </label>
-          <label>
-            Aviso en la inscripción (HTML)
-            <textarea name="noticeHtml" defaultValue={event.noticeHtml ?? ""} disabled={!canEdit} />
           </label>
           <label>
             Fin de inscripción
