@@ -1,10 +1,8 @@
 export function AuthBrand() {
   return (
     <div className="auth-brand">
-      <span className="auth-brand-mark" aria-hidden="true">
-        λ
-      </span>
-      <span>Lambda Score</span>
+      <img className="auth-brand-logo" src="/brand/tempozero.jpg" alt="Tempozero" />
+      <span>TEMPOZERO</span>
     </div>
   );
 }
