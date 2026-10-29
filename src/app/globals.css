@@ -290,6 +290,19 @@ button.danger:hover:not(:disabled) {
   background: #7f2424;
 }
 
+button.mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #0f6e56;
+  color: #fff;
+  border: 1px solid #0a5340;
+}
+
+button.mail:hover:not(:disabled) {
+  background: #0a5340;
+}
+
 button.full,
 .button.full {
   width: 100%;
