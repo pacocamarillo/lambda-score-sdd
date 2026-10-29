@@ -6,8 +6,10 @@ import { assignBib } from "@/modules/events/bib";
 import { capacityAvailable, countActiveRegistrations } from "@/modules/events/capacity";
 import { registrationIsOpen } from "@/modules/events/crud";
 import { GENDER_ANSWER_KEY, parseGender } from "@/modules/events/category-eligibility";
+import { sendRegistrationConfirmationEmail } from "@/modules/events/confirmation-email";
 import { fieldsForCompetition, listFormFields, validateCustomAnswers } from "@/modules/events/form";
 import type { ActionResult, DocumentType, ParticipantGender, ParticipantInput } from "@/modules/events/types";
+import { waiverDataFromRegistration } from "@/modules/events/waiver-data";
 
 const DOCUMENT_TYPES: DocumentType[] = ["ine", "curp", "rfc", "other"];
 
@@ -152,6 +154,22 @@ export async function registerParticipant(
     if (created.status === "confirmed" && event.autoAssignBib) {
       const assigned = await assignBib(created.registrationId);
       if (assigned.ok) bib = assigned.bib;
+    }
+
+    try {
+      const waiver = await waiverDataFromRegistration(input.eventId, created.registrationId, event);
+      if (waiver) {
+        await sendRegistrationConfirmationEmail({
+          to: participant.email,
+          eventId: input.eventId,
+          registrationId: created.registrationId,
+          status: created.status,
+          bib,
+          waiver,
+        });
+      }
+    } catch (mailError) {
+      console.error("No se pudo enviar el correo de confirmación de inscripción.", mailError);
     }
 
     return { ok: true, registrationId: created.registrationId, status: created.status, bib };

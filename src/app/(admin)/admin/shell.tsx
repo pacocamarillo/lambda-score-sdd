@@ -22,6 +22,7 @@ export function AppShell(props: {
     <div className={open ? "app-shell" : "app-shell is-collapsed"}>
       <aside className="side">
         <div className="side-brand">
+          <img className="side-logo" src="/brand/tempozero.jpg" alt="Tempozero" />
           <strong>{props.organizationName ?? "Organización"}</strong>
           <span>Panel de organización</span>
         </div>
@@ -32,6 +33,7 @@ export function AppShell(props: {
           <button type="button" className="ghost" aria-label="Alternar menú" onClick={() => setOpen((value) => !value)}>
             Menú
           </button>
+          <img className="topbar-logo" src="/brand/tempozero.jpg" alt="Tempozero" />
           <span className="org">{props.organizationName}</span>
           <span className="spacer" />
           <AccountMenu

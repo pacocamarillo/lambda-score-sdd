@@ -20,9 +20,18 @@ export async function sendAccessEmail(input: { to: string; kind: MailKind; url: 
     input.url,
   ].join("\n");
 
+  await sendHtmlEmail({ to: input.to, subject, text });
+}
+
+export async function sendHtmlEmail(input: {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+}): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.info(`[correo:${input.kind}] para ${input.to}\n${text}`);
+    console.info(`[correo] para ${input.to}\n${input.subject}\n${input.text}`);
     return;
   }
 
@@ -30,8 +39,9 @@ export async function sendAccessEmail(input: { to: string; kind: MailKind; url: 
   await resend.emails.send({
     from: process.env.EMAIL_FROM ?? "avisos@example.com",
     to: input.to,
-    subject,
-    text,
+    subject: input.subject,
+    text: input.text,
+    html: input.html,
   });
 }
 
