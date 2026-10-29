@@ -368,6 +368,17 @@ button.full,
   border-bottom: 1px solid var(--line);
 }
 
+.side-logo {
+  display: block;
+  width: 100%;
+  max-width: 11.5rem;
+  height: auto;
+  margin: 0 0 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: #0b1220;
+}
+
 .side-brand strong {
   display: block;
   font-size: 0.95rem;
@@ -380,6 +391,26 @@ button.full,
   margin-top: 0.15rem;
   font-size: 0.78rem;
   color: var(--muted);
+}
+
+.topbar-logo {
+  display: none;
+  height: 2rem;
+  width: auto;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #0b1220;
+}
+
+.brand-banner {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+  height: auto;
+  margin: 0 auto 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: #0b1220;
 }
 
 .side nav {
@@ -1012,6 +1043,18 @@ button:disabled,
   .side {
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+
+  .side-logo {
+    max-width: 9.5rem;
+  }
+
+  .topbar-logo {
+    display: block;
+  }
+
+  .topbar .org {
+    display: none;
   }
 
   .grid-2,
