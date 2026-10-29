@@ -1,5 +1,3 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
-import path from "node:path";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -53,18 +51,8 @@ export default async function EventEditPage({
       const bytes = new Uint8Array(await imageFile.arrayBuffer());
       const checked = validateEventImage(bytes);
       if (!checked.ok) redirect(`/admin/events/${id}?error=${encodeURIComponent(checked.message)}`);
-      // Persist in DB as data URL so the public banner works on Vercel (no durable local disk).
+      // Only persist in DB as data URL. Vercel serverless has no writable public/ disk.
       imageKey = toEventImageDataUrl(bytes, checked.ext);
-      try {
-        const directory = path.join(process.cwd(), "public", "uploads", "events");
-        await mkdir(directory, { recursive: true });
-        await writeFile(path.join(directory, `${id}.${checked.ext}`), bytes);
-        for (const ext of ["png", "jpg", "gif"] as const) {
-          if (ext !== checked.ext) await rm(path.join(directory, `${id}.${ext}`), { force: true });
-        }
-      } catch {
-        // Optional local cache; ignore failures on read-only hosts.
-      }
     }
     const currentEvent = await getOwnedEvent(id, current.organizationId);
     if (!currentEvent) redirect("/admin/events");
