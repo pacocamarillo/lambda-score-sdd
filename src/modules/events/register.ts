@@ -320,6 +320,46 @@ export async function updateEventRegistration(
   return { ok: true };
 }
 
+/** Reenvía el correo de confirmación (con QR) a la inscripción actual. */
+export async function resendRegistrationConfirmation(
+  eventId: string,
+  organizationId: string,
+  registrationId: string,
+): Promise<ActionResult> {
+  const db = getDb();
+  const [event] = await db.select().from(events).where(eq(events.id, eventId)).limit(1);
+  if (!event || event.organizationId !== organizationId) {
+    return { ok: false, message: "No se encontró el evento." };
+  }
+
+  const existing = await getEventRegistration(eventId, organizationId, registrationId);
+  if (!existing) return { ok: false, message: "No se encontró la inscripción." };
+  if (!existing.email?.includes("@")) {
+    return { ok: false, message: "La inscripción no tiene un correo válido." };
+  }
+
+  const waiver = await waiverDataFromRegistration(eventId, registrationId, event);
+  if (!waiver) {
+    return { ok: false, message: "No se pudo armar la confirmación para este participante." };
+  }
+
+  try {
+    await sendRegistrationConfirmationEmail({
+      to: existing.email,
+      eventId,
+      registrationId,
+      status: existing.status,
+      bib: existing.bib,
+      waiver,
+    });
+  } catch (mailError) {
+    console.error("No se pudo reenviar el correo de confirmación.", mailError);
+    return { ok: false, message: "No se pudo enviar el correo. Revisa la configuración de correo." };
+  }
+
+  return { ok: true };
+}
+
 /** Exportado para pruebas de cupo sin UI. */
 export async function tryReserveSlot(
   competitionId: string,

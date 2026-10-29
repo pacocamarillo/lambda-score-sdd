@@ -9,6 +9,7 @@ import { listRegistrationAddOns } from "@/modules/events/add-ons";
 import {
   getEventRegistration,
   listEventRegistrations,
+  resendRegistrationConfirmation,
   updateEventRegistration,
 } from "@/modules/events/register";
 import type { DocumentType, ParticipantGender } from "@/modules/events/types";
@@ -46,7 +47,7 @@ export default async function EventParticipantsPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string; edit?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; mailed?: string; edit?: string }>;
 }) {
   const session = await auth();
   if (!session?.organizationId) redirect("/admin/elegir");
@@ -99,6 +100,24 @@ export default async function EventParticipantsPage({
     redirect(`/admin/events/${id}/participantes?saved=1`);
   }
 
+  async function resendMail(formData: FormData) {
+    "use server";
+    const current = await auth();
+    if (!current?.organizationId || (current.role !== "owner" && current.role !== "admin")) {
+      redirect("/admin");
+    }
+    const registrationId = String(formData.get("registrationId") ?? "");
+    const result = await resendRegistrationConfirmation(id, current.organizationId, registrationId);
+    if (!result.ok) {
+      redirect(
+        `/admin/events/${id}/participantes?edit=${encodeURIComponent(registrationId)}&error=${encodeURIComponent(result.message)}`,
+      );
+    }
+    redirect(
+      `/admin/events/${id}/participantes?edit=${encodeURIComponent(registrationId)}&mailed=1`,
+    );
+  }
+
   return (
     <div className="stack">
       <header className="page-head">
@@ -120,6 +139,7 @@ export default async function EventParticipantsPage({
       <EventNav eventId={id} current="/participantes" />
       {query.error ? <p className="error">{query.error}</p> : null}
       {query.saved ? <p className="notice">Cambios guardados.</p> : null}
+      {query.mailed ? <p className="notice">Correo de confirmación reenviado.</p> : null}
       {query.edit && !editing ? <p className="error">No se encontró la inscripción a editar.</p> : null}
 
       <section className="card">
@@ -305,6 +325,23 @@ export default async function EventParticipantsPage({
               <Link href={`/admin/events/${id}/participantes`} className="ghost">
                 Cancelar
               </Link>
+              <button type="submit" formAction={resendMail} className="mail" formNoValidate>
+                <svg
+                  aria-hidden="true"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m22 7-10 7L2 7" />
+                </svg>
+                Reenviar correo
+              </button>
             </div>
           </form>
         </section>
