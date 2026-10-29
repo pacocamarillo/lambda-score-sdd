@@ -154,7 +154,6 @@ export default async function EventParticipantsPage({
                   <th scope="col">Correo</th>
                   <th scope="col">Género</th>
                   <th scope="col">Nacimiento</th>
-                  <th scope="col">Documento</th>
                   <th scope="col">Competencia</th>
                   <th scope="col">Categoría</th>
                   <th scope="col">Estado</th>
@@ -171,10 +170,6 @@ export default async function EventParticipantsPage({
                     <td>{row.email}</td>
                     <td>{genderLabel(row.gender)}</td>
                     <td>{toDateInput(row.birthDate)}</td>
-                    <td>
-                      {row.documentType.toUpperCase()}
-                      {row.documentNumber ? ` ${row.documentNumber}` : ""}
-                    </td>
                     <td>{row.competitionName}</td>
                     <td>{categorySummary(row.answers ?? {}, categoryFields)}</td>
                     <td>{statusLabel(row.status)}</td>
