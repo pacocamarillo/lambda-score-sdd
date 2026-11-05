@@ -13,6 +13,7 @@ import {
 } from "@/modules/events/publish";
 import { DangerSubmitButton } from "../danger-submit-button";
 import { EventNav } from "../event-nav";
+import { EventPageMenu } from "../event-page-menu";
 
 function toLocalInput(value: Date | null | undefined) {
   if (!value) return "";
@@ -141,9 +142,7 @@ export default async function EventEditPage({
             Estado: {event.status}. Inscripción: {event.registrationOpen ? "abierta" : "cerrada"}.
           </p>
         </div>
-        <Link className="button ghost" href={`/eventos/${event.id}`}>
-          Ver página
-        </Link>
+        <EventPageMenu href={`/eventos/${event.id}`} />
       </header>
 
       <EventNav eventId={id} current="" />
