@@ -118,6 +118,31 @@ export const addOns = pgTable("add_on", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const coupons = pgTable(
+  "coupon",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    code: text("code").notNull(),
+    discountType: text("discount_type").notNull(),
+    percent: integer("percent"),
+    amountCents: integer("amount_cents"),
+    description: text("description").notNull().default(""),
+    appliesToRegistration: boolean("applies_to_registration").notNull().default(false),
+    appliesToAddOns: boolean("applies_to_add_ons").notNull().default(false),
+    allEvents: boolean("all_events").notNull().default(false),
+    eventIds: jsonb("event_ids").$type<string[]>().notNull().default([]),
+    includeFutureCompetitions: boolean("include_future_competitions").notNull().default(false),
+    usageLimit: integer("usage_limit"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    useCount: integer("use_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique("coupon_organization_code").on(table.organizationId, table.code)],
+);
+
 export const registrationAddOns = pgTable("registration_add_on", {
   id: uuid("id").primaryKey().defaultRandom(),
   registrationId: uuid("registration_id")
