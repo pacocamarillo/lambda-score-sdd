@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { LegalIntroLinks } from "@/components/legal-links";
 import { listAddOns, visibleAddOnsForCompetition } from "@/modules/events/add-ons";
 import { listCompetitionsWithAvailability } from "@/modules/events/competitions";
 import { getPublicEvent, registrationIsOpen } from "@/modules/events/crud";
@@ -132,6 +133,7 @@ export default async function InscripcionPage({
         </p>
         <h1>Inscripción</h1>
         <p className="lede">Completa tus datos, elige competencia y acepta términos y renuncia.</p>
+        <LegalIntroLinks />
       </header>
       {query.error ? <p className="error">{query.error}</p> : null}
       {event.noticeHtml ? (
