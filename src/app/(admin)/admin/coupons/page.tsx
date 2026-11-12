@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { createCoupon, listOrganizationCoupons } from "@/modules/coupons/crud";
+import { createBulkCoupons, createCoupon, listOrganizationCoupons } from "@/modules/coupons/crud";
 import { couponStatus, formatCouponDiscount } from "@/modules/coupons/parse";
 import { listOrganizationEvents } from "@/modules/events/crud";
 import { EmptyTable, PageIntro } from "../listing";
@@ -26,7 +26,14 @@ function money(cents: number) {
 export default async function CouponsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; event?: string; status?: string; error?: string; saved?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    event?: string;
+    status?: string;
+    error?: string;
+    saved?: string;
+    bulk?: string;
+  }>;
 }) {
   const session = await auth();
   if (!session?.organizationId) redirect("/admin/elegir");
@@ -61,7 +68,7 @@ export default async function CouponsPage({
       redirect("/admin");
     }
     const known = await listOrganizationEvents(current.organizationId);
-    const result = await createCoupon(current.organizationId, {
+    const payload = {
       code: String(formData.get("code") ?? ""),
       discountType: String(formData.get("discountType") ?? ""),
       percent: String(formData.get("percent") ?? ""),
@@ -77,7 +84,14 @@ export default async function CouponsPage({
       hasExpiry: formData.get("hasExpiry") === "on",
       expiresOn: String(formData.get("expiresOn") ?? ""),
       knownEventIds: known.map((event) => event.id),
-    });
+    };
+    if (String(formData.get("createMode") ?? "") === "bulk") {
+      const quantity = Number(formData.get("bulkQuantity") ?? 0);
+      const result = await createBulkCoupons(current.organizationId, payload, quantity);
+      if (!result.ok) redirect(`/admin/coupons?error=${encodeURIComponent(result.message)}`);
+      redirect(`/admin/coupons?saved=1&bulk=${result.codes.length}`);
+    }
+    const result = await createCoupon(current.organizationId, payload);
     if (!result.ok) redirect(`/admin/coupons?error=${encodeURIComponent(result.message)}`);
     redirect("/admin/coupons?saved=1");
   }
@@ -87,10 +101,26 @@ export default async function CouponsPage({
       <PageIntro
         title="Cupones"
         lede="Un cupón reduce el total. Se aplica al momento del pago del participante."
-        action={canEdit ? <CreateCouponDialog events={events.map((event) => ({ id: event.id, name: event.name }))} action={create} /> : null}
+        action={
+          canEdit ? (
+            <div className="inline-actions">
+              <CreateCouponDialog
+                events={events.map((event) => ({ id: event.id, name: event.name }))}
+                action={create}
+              />
+              <a className="button ghost" href="/admin/coupons/export">
+                Exportar Excel
+              </a>
+            </div>
+          ) : null
+        }
       />
       {params.error ? <p className="error">{params.error}</p> : null}
-      {params.saved ? <p className="notice">Cupón creado.</p> : null}
+      {params.saved ? (
+        <p className="notice">
+          {params.bulk ? `${params.bulk} cupones creados.` : "Cupón creado."}
+        </p>
+      ) : null}
       <section className="card" aria-label="Resumen de usos y ahorro">
         <h2>Resumen de usos y ahorro</h2>
         <p className="lede">Indicadores de todos los cupones de la organización.</p>

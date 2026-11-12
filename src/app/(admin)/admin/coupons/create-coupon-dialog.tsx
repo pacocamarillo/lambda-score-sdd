@@ -22,6 +22,7 @@ export function CreateCouponDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"coupon" | "conditions">("coupon");
+  const [mode, setMode] = useState<"single" | "bulk">("single");
   const [code, setCode] = useState("");
   const [discountType, setDiscountType] = useState<"percent" | "fixed">("percent");
   const [scope, setScope] = useState<"all" | "specific">("all");
@@ -31,6 +32,7 @@ export function CreateCouponDialog({
   function close() {
     setOpen(false);
     setTab("coupon");
+    setMode("single");
   }
 
   if (!open) {
@@ -50,19 +52,52 @@ export function CreateCouponDialog({
         aria-labelledby="create-coupon-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id="create-coupon-title">Crear cupón</h2>
+        <h2 id="create-coupon-title">{mode === "bulk" ? "Cupón masivo" : "Crear cupón"}</h2>
         <form action={action} className="stack">
-          <label>
-            Código del cupón
-            <input name="code" required value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} />
-          </label>
-          <button
-            type="button"
-            className="ghost"
-            onClick={() => setCode(randomCode())}
-          >
-            Generar código
-          </button>
+          <input type="hidden" name="createMode" value={mode} />
+          <fieldset>
+            <legend>Tipo de creación</legend>
+            <label className="switch-row">
+              <input
+                type="radio"
+                name="modeUi"
+                checked={mode === "single"}
+                onChange={() => setMode("single")}
+              />
+              Cupón individual
+            </label>
+            <label className="switch-row">
+              <input
+                type="radio"
+                name="modeUi"
+                checked={mode === "bulk"}
+                onChange={() => setMode("bulk")}
+              />
+              Cupón masivo
+            </label>
+          </fieldset>
+
+          {mode === "single" ? (
+            <>
+              <label>
+                Código del cupón
+                <input
+                  name="code"
+                  required
+                  value={code}
+                  onChange={(event) => setCode(event.target.value.toUpperCase())}
+                />
+              </label>
+              <button type="button" className="ghost" onClick={() => setCode(randomCode())}>
+                Generar código
+              </button>
+            </>
+          ) : (
+            <label>
+              Cantidad de cupones (1 a 100)
+              <input name="bulkQuantity" type="number" min={1} max={100} step={1} defaultValue={10} required />
+            </label>
+          )}
 
           <div className="tabs" role="tablist">
             <button type="button" role="tab" aria-selected={tab === "coupon"} onClick={() => setTab("coupon")}>
@@ -176,10 +211,20 @@ export function CreateCouponDialog({
             </label>
 
             <div className="inline-actions">
-              <button type="button" className={limitUses ? "" : "ghost"} aria-pressed={limitUses} onClick={() => setLimitUses((value) => !value)}>
+              <button
+                type="button"
+                className={limitUses ? "" : "ghost"}
+                aria-pressed={limitUses}
+                onClick={() => setLimitUses((value) => !value)}
+              >
                 Limitar cantidad de usos
               </button>
-              <button type="button" className={hasExpiry ? "" : "ghost"} aria-pressed={hasExpiry} onClick={() => setHasExpiry((value) => !value)}>
+              <button
+                type="button"
+                className={hasExpiry ? "" : "ghost"}
+                aria-pressed={hasExpiry}
+                onClick={() => setHasExpiry((value) => !value)}
+              >
                 Fecha de vencimiento
               </button>
             </div>
@@ -200,7 +245,7 @@ export function CreateCouponDialog({
           </div>
 
           <div className="inline-actions">
-            <button type="submit">Crear cupón</button>
+            <button type="submit">{mode === "bulk" ? "Crear cupones" : "Crear cupón"}</button>
             <button type="button" className="ghost" onClick={close}>
               Cancelar
             </button>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { LegalIntroLinks } from "@/components/legal-links";
 import { listCompetitionsWithAvailability } from "@/modules/events/competitions";
 import { getPublicEvent, registrationIsOpen } from "@/modules/events/crud";
 import { registerTeam } from "@/modules/events/teams";
@@ -98,6 +99,7 @@ export default async function TeamInscripcionPage({
             ? `Mínimo ${selected.teamMinSize ?? 2} integrantes${selected.teamNameRequired ? " y nombre de equipo" : ""}.`
             : "Elige una competencia de equipo."}
         </p>
+        <LegalIntroLinks />
       </header>
       {query.error ? <p className="error">{query.error}</p> : null}
 
@@ -161,7 +163,14 @@ export default async function TeamInscripcionPage({
           <div className="register-grid">
             <label className="switch-row full">
               <input name="acceptedTerms" type="checkbox" required />
-              Acepto los términos
+              Acepto los{" "}
+              <Link href="/terminos" target="_blank">
+                términos y condiciones
+              </Link>{" "}
+              y el{" "}
+              <Link href="/aviso-de-privacidad" target="_blank">
+                aviso de privacidad
+              </Link>
             </label>
             <label className="switch-row full">
               <input name="acceptedWaiver" type="checkbox" required />

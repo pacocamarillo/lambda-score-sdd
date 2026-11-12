@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS "site" (
+  "organization_id" uuid PRIMARY KEY REFERENCES "organization"("id") ON DELETE cascade,
+  "active" boolean NOT NULL DEFAULT false,
+  "color_primary" text NOT NULL DEFAULT '#1e4d5c',
+  "color_secondary" text NOT NULL DEFAULT '#5f6b76',
+  "color_accent" text NOT NULL DEFAULT '#1d7a46',
+  "color_success" text NOT NULL DEFAULT '#1d7a46',
+  "color_warning" text NOT NULL DEFAULT '#7a4e12',
+  "cover_enabled" boolean NOT NULL DEFAULT true,
+  "cover_image" text,
+  "cover_title" text NOT NULL DEFAULT '',
+  "cover_description" text NOT NULL DEFAULT '',
+  "sponsors" jsonb NOT NULL DEFAULT '[]'::jsonb,
+  "facebook_url" text NOT NULL DEFAULT '',
+  "x_url" text NOT NULL DEFAULT '',
+  "instagram_url" text NOT NULL DEFAULT '',
+  "youtube_url" text NOT NULL DEFAULT '',
+  "contact_phone" text NOT NULL DEFAULT '',
+  "contact_email" text NOT NULL DEFAULT '',
+  "updated_at" timestamp with time zone NOT NULL DEFAULT now()
+);

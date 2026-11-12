@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   filterCategoryOptions,
@@ -247,7 +248,14 @@ export function RegistrationForm({
 
         <label className="switch-row full">
           <input name="acceptedTerms" type="checkbox" required />
-          Acepto los términos
+          Acepto los{" "}
+          <Link href="/terminos" target="_blank">
+            términos y condiciones
+          </Link>{" "}
+          y el{" "}
+          <Link href="/aviso-de-privacidad" target="_blank">
+            aviso de privacidad
+          </Link>
         </label>
         <label className="switch-row full">
           <input name="acceptedWaiver" type="checkbox" required />
