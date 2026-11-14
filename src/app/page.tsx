@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { hasDatabase } from "@/db/client";
 import { organizationFromRequestHost } from "@/lib/tenant";
+import { listPublishedNews } from "@/modules/site/news";
 import { getSiteSettings } from "@/modules/site/settings";
 import { PublicHomePage } from "./(public)/home-page";
 import { PublicFooter } from "./(public)/footer";
@@ -28,10 +29,23 @@ export default async function HomePage() {
     );
   }
 
+  const news = await listPublishedNews(organization.id);
+
   return (
     <div className="public-shell">
       <main className="auth-shell">
-        <PublicHomePage organizationName={organization.name} settings={settings} />
+        <PublicHomePage
+          organizationName={organization.name}
+          settings={settings}
+          news={news.map((post) => ({
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            excerpt: post.excerpt,
+            imageDataUrl: post.imageDataUrl,
+            publishedAt: post.publishedAt,
+          }))}
+        />
       </main>
       <PublicFooter />
     </div>

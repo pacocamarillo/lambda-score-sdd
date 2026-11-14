@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { createNewsPost, listNewsPosts } from "@/modules/site/news";
 import {
   addSponsor,
   deleteSponsor,
@@ -29,7 +30,10 @@ export default async function WebsitePage({
   const session = await auth();
   if (!session?.organizationId) redirect("/admin/elegir");
   const query = await searchParams;
-  const settings = await getSiteSettings(session.organizationId);
+  const [settings, newsPosts] = await Promise.all([
+    getSiteSettings(session.organizationId),
+    listNewsPosts(session.organizationId),
+  ]);
 
   async function toggleActive(formData: FormData) {
     "use server";
@@ -132,10 +136,32 @@ export default async function WebsitePage({
     redirect("/admin/website?saved=1");
   }
 
+  async function createNewsAction(formData: FormData) {
+    "use server";
+    const current = await requireEditor();
+    const file = formData.get("image");
+    const bytes = file instanceof File ? new Uint8Array(await file.arrayBuffer()) : new Uint8Array();
+    const result = await createNewsPost(current.organizationId!, {
+      title: String(formData.get("title") ?? ""),
+      contentHtml: String(formData.get("contentHtml") ?? ""),
+      imageBytes: bytes,
+      publish: true,
+    });
+    if (!result.ok) redirect(`/admin/website?error=${encodeURIComponent(result.message)}`);
+    redirect("/admin/website?saved=1");
+  }
+
   return (
     <WebsiteScreen
       organizationName={session.organizationName ?? "la organización"}
       settings={settings}
+      newsPosts={newsPosts.map((post) => ({
+        id: post.id,
+        title: post.title,
+        status: post.status,
+        publishedAt: post.publishedAt?.toISOString() ?? null,
+        createdAt: post.createdAt.toISOString(),
+      }))}
       notice={query.saved ? "Cambios guardados." : undefined}
       error={query.error}
       actions={{
@@ -147,6 +173,7 @@ export default async function WebsitePage({
         addSponsor: addSponsorAction,
         updateSponsor: updateSponsorAction,
         deleteSponsor: deleteSponsorAction,
+        createNews: createNewsAction,
       }}
     />
   );

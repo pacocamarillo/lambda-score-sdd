@@ -1,12 +1,23 @@
 import Link from "next/link";
 import type { SiteSettings } from "@/modules/site/settings";
 
+type NewsCard = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  imageDataUrl: string | null;
+  publishedAt: Date | null;
+};
+
 export function PublicHomePage({
   organizationName,
   settings,
+  news,
 }: {
   organizationName: string;
   settings: SiteSettings;
+  news: NewsCard[];
 }) {
   const networks = [
     ["Facebook", settings.facebookUrl],
@@ -14,6 +25,9 @@ export function PublicHomePage({
     ["Instagram", settings.instagramUrl],
     ["YouTube", settings.youtubeUrl],
   ].filter(([, url]) => Boolean(url)) as Array<[string, string]>;
+
+  const featured = news.slice(0, 3);
+  const older = news.slice(3);
 
   return (
     <div className="stack public-home" style={themeInline(settings)}>
@@ -79,6 +93,38 @@ export function PublicHomePage({
           ) : null}
         </section>
       )}
+
+      {news.length > 0 ? (
+        <section className="card stack">
+          <h2>Noticias</h2>
+          <div className="news-grid">
+            {featured.map((post) => (
+              <article key={post.id} className="news-card">
+                {post.imageDataUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={post.imageDataUrl} alt="" />
+                ) : null}
+                <h3>
+                  <Link href={`/noticias/${post.slug}`}>{post.title}</Link>
+                </h3>
+                {post.excerpt ? <p>{post.excerpt}</p> : null}
+              </article>
+            ))}
+          </div>
+          {older.length > 0 ? (
+            <ul className="feature-list">
+              {older.map((post) => (
+                <li key={post.id}>
+                  <Link href={`/noticias/${post.slug}`}>{post.title}</Link>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="hint">
+            <Link href="/noticias">Ver todas las noticias</Link>
+          </p>
+        </section>
+      ) : null}
 
       <p className="hint">
         <Link href="/login">Acceso al panel</Link>
