@@ -124,4 +124,19 @@ export async function listOrganizationCoupons(organizationId: string) {
     .orderBy(desc(coupons.createdAt));
 }
 
+export async function deleteCoupon(
+  organizationId: string,
+  couponId: string,
+): Promise<ActionResult> {
+  const db = getDb();
+  const [row] = await db
+    .select({ id: coupons.id, organizationId: coupons.organizationId })
+    .from(coupons)
+    .where(and(eq(coupons.id, couponId), eq(coupons.organizationId, organizationId)))
+    .limit(1);
+  if (!row) return { ok: false, message: "No se encontró el cupón." };
+  await db.delete(coupons).where(and(eq(coupons.id, couponId), eq(coupons.organizationId, organizationId)));
+  return { ok: true };
+}
+
 export type { ParsedCoupon };

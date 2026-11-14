@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { createBulkCoupons, createCoupon, listOrganizationCoupons } from "@/modules/coupons/crud";
+import {
+  createBulkCoupons,
+  createCoupon,
+  deleteCoupon,
+  listOrganizationCoupons,
+} from "@/modules/coupons/crud";
 import { couponStatus, formatCouponDiscount } from "@/modules/coupons/parse";
 import { listOrganizationEvents } from "@/modules/events/crud";
 import { EmptyTable, PageIntro } from "../listing";
@@ -92,6 +97,17 @@ export default async function CouponsPage({
       redirect(`/admin/coupons?saved=1&bulk=${result.codes.length}`);
     }
     const result = await createCoupon(current.organizationId, payload);
+    if (!result.ok) redirect(`/admin/coupons?error=${encodeURIComponent(result.message)}`);
+    redirect("/admin/coupons?saved=1");
+  }
+
+  async function remove(formData: FormData) {
+    "use server";
+    const current = await auth();
+    if (!current?.organizationId || (current.role !== "owner" && current.role !== "admin")) {
+      redirect("/admin");
+    }
+    const result = await deleteCoupon(current.organizationId, String(formData.get("couponId") ?? ""));
     if (!result.ok) redirect(`/admin/coupons?error=${encodeURIComponent(result.message)}`);
     redirect("/admin/coupons?saved=1");
   }
@@ -217,7 +233,19 @@ export default async function CouponsPage({
                         ? row.expiresAt.toLocaleDateString("es-MX", { timeZone: "America/Mexico_City" })
                         : "Sin vencimiento"}
                     </td>
-                    <td>{statusLabel(couponStatus(row))}</td>
+                    <td>
+                      <div className="inline-actions">
+                        <span>{statusLabel(couponStatus(row))}</span>
+                        {canEdit ? (
+                          <form action={remove}>
+                            <input type="hidden" name="couponId" value={row.id} />
+                            <button type="submit" className="ghost">
+                              Eliminar
+                            </button>
+                          </form>
+                        ) : null}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

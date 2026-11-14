@@ -8,6 +8,8 @@ const HEX = /^#[0-9A-Fa-f]{6}$/;
 const MAX_SPONSORS = 100;
 const MAX_COVER_DESC = 2000;
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+const COVER_MIN_WIDTH = 1200;
+const COVER_MIN_HEIGHT = 630;
 
 export type SiteSettings = {
   organizationId: string;
@@ -110,10 +112,34 @@ export function toPngDataUrl(bytes: Uint8Array) {
   return `data:image/png;base64,${Buffer.from(bytes).toString("base64")}`;
 }
 
+function readPngSize(bytes: Uint8Array): { width: number; height: number } | null {
+  if (!isPng(bytes) || bytes.length < 24) return null;
+  const width =
+    ((bytes[16] ?? 0) << 24) | ((bytes[17] ?? 0) << 16) | ((bytes[18] ?? 0) << 8) | (bytes[19] ?? 0);
+  const height =
+    ((bytes[20] ?? 0) << 24) | ((bytes[21] ?? 0) << 16) | ((bytes[22] ?? 0) << 8) | (bytes[23] ?? 0);
+  if (width <= 0 || height <= 0) return null;
+  return { width: width >>> 0, height: height >>> 0 };
+}
+
 export function validatePngLogo(bytes: Uint8Array): ActionResult {
   if (bytes.byteLength === 0) return { ok: false, message: "Selecciona un logo PNG." };
   if (bytes.byteLength > MAX_LOGO_BYTES) return { ok: false, message: "El logo no puede superar 2 MB." };
   if (!isPng(bytes)) return { ok: false, message: "El logo debe ser PNG." };
+  return { ok: true };
+}
+
+export function validateCoverImage(bytes: Uint8Array): ActionResult {
+  const base = validatePngLogo(bytes);
+  if (!base.ok) return base;
+  const size = readPngSize(bytes);
+  if (!size) return { ok: false, message: "No se pudo leer el tamaño de la imagen PNG." };
+  if (size.width < COVER_MIN_WIDTH || size.height < COVER_MIN_HEIGHT) {
+    return {
+      ok: false,
+      message: `La imagen debe medir al menos ${COVER_MIN_WIDTH}×${COVER_MIN_HEIGHT} px. Esta mide ${size.width}×${size.height} px.`,
+    };
+  }
   return { ok: true };
 }
 
@@ -183,7 +209,7 @@ export async function saveCover(
   let coverImage: string | null | undefined;
   if (input.clearImage) coverImage = null;
   if (input.coverImageBytes && input.coverImageBytes.byteLength > 0) {
-    const check = validatePngLogo(input.coverImageBytes);
+    const check = validateCoverImage(input.coverImageBytes);
     if (!check.ok) return check;
     coverImage = toPngDataUrl(input.coverImageBytes);
   }

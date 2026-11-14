@@ -1,7 +1,12 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
+import { getDb, hasDatabase } from "@/db/client";
+import { organizations } from "@/db/schema/access";
 import { auth, signOut } from "@/lib/auth";
 import { isStaffBlockedSection } from "@/modules/access/event-guard";
+import { isNavBlockedForProfile, type NavProfile } from "@/modules/access/rules";
+import { getSiteSettings } from "@/modules/site/settings";
 import { AdminNav } from "./nav";
 import { AppShell } from "./shell";
 
@@ -19,6 +24,27 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/admin");
   }
 
+  let navProfile: NavProfile = "full";
+  let logoUrl: string | null = null;
+  if (session.organizationId && hasDatabase()) {
+    try {
+      const db = getDb();
+      const [org] = await db
+        .select({ navProfile: organizations.navProfile })
+        .from(organizations)
+        .where(eq(organizations.id, session.organizationId))
+        .limit(1);
+      navProfile = org?.navProfile === "events_coupons" ? "events_coupons" : "full";
+      if (isNavBlockedForProfile(navProfile, path)) {
+        redirect("/admin/events");
+      }
+      const settings = await getSiteSettings(session.organizationId);
+      logoUrl = settings.coverImage;
+    } catch {
+      navProfile = "full";
+    }
+  }
+
   async function logout() {
     "use server";
     await signOut({ redirectTo: "/login" });
@@ -32,7 +58,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <AppShell
       organizationName={session.organizationName}
       userName={session.user.name ?? session.user.email ?? ""}
-      nav={<AdminNav role={session.role} />}
+      logoUrl={logoUrl}
+      nav={<AdminNav role={session.role} navProfile={navProfile} />}
       logout={
         <form action={logout}>
           <button className="ghost" type="submit">

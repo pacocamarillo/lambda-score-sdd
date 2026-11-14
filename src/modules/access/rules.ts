@@ -21,6 +21,16 @@ export function canRemoveOwner(activeOwnerCount: number): boolean {
 export type OrgRole = "owner" | "admin" | "staff";
 export type StaffMode = "none" | "all" | "specific" | "all_except";
 export type EventLevel = "viewer" | "operator" | "event_admin";
+export type NavProfile = "full" | "events_coupons";
+
+export function isNavBlockedForProfile(navProfile: NavProfile, pathname: string): boolean {
+  if (navProfile !== "events_coupons") return false;
+  if (!pathname || pathname === "/admin/elegir") return false;
+  const allowedExact = new Set(["/admin"]);
+  const allowedPrefixes = ["/admin/events", "/admin/coupons", "/admin/profile"];
+  if (allowedExact.has(pathname)) return false;
+  return !allowedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
 
 export function canSaveStaff(advancedRolesEnabled: boolean, role: OrgRole): PasswordCheck {
   if (role === "staff" && !advancedRolesEnabled) {

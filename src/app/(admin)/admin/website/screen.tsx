@@ -3,8 +3,17 @@
 import { useState, type CSSProperties } from "react";
 import { EmptyTable, PageIntro } from "../listing";
 import type { SiteSettings } from "@/modules/site/settings";
+import { NewsEditor } from "./news-editor";
 
 type Action = (formData: FormData) => void | Promise<void>;
+
+type NewsRow = {
+  id: string;
+  title: string;
+  status: string;
+  publishedAt: string | null;
+  createdAt: string;
+};
 
 type WebsiteActions = {
   toggleActive: Action;
@@ -15,17 +24,20 @@ type WebsiteActions = {
   addSponsor: Action;
   updateSponsor: Action;
   deleteSponsor: Action;
+  createNews: Action;
 };
 
 export function WebsiteScreen({
   organizationName,
   settings,
+  newsPosts,
   notice,
   error,
   actions,
 }: {
   organizationName: string;
   settings: SiteSettings;
+  newsPosts: NewsRow[];
   notice?: string;
   error?: string;
   actions: WebsiteActions;
@@ -78,7 +90,11 @@ export function WebsiteScreen({
           Noticias
         </button>
       </div>
-      {tab === "home" ? <HomeTab settings={settings} actions={actions} /> : <NewsTab />}
+      {tab === "home" ? (
+        <HomeTab settings={settings} actions={actions} />
+      ) : (
+        <NewsTab posts={newsPosts} createNews={actions.createNews} />
+      )}
     </div>
   );
 }
@@ -161,9 +177,10 @@ function HomeTab({ settings, actions }: { settings: SiteSettings; actions: Websi
                 Mostrar sección de portada
               </label>
               <label>
-                Imagen o logo (PNG)
+                Imagen o logo (PNG) (dimensiones mínimas 1200 x 630px)
                 <input name="coverImage" type="file" accept="image/png" />
               </label>
+              <p className="hint">Este archivo también actualiza el logo del panel (superior izquierda).</p>
               {settings.coverImage ? (
                 <label className="switch-row">
                   <input name="clearImage" type="checkbox" />
@@ -394,41 +411,54 @@ function HomeTab({ settings, actions }: { settings: SiteSettings; actions: Websi
   );
 }
 
-function NewsTab() {
+function NewsTab({ posts, createNews }: { posts: NewsRow[]; createNews: Action }) {
   return (
     <section className="card stack">
       <div className="card-head">
         <h2>Noticias</h2>
-        <button type="button" disabled>
-          Crear artículo
-        </button>
+        <NewsEditor action={createNews} />
       </div>
-      <form className="filters">
-        <label>
-          Buscar
-          <input type="search" placeholder="Buscar artículos" />
-        </label>
-        <label>
-          Estado
-          <select defaultValue="all">
-            <option value="all">Todos los estados</option>
-            <option value="draft">Borrador</option>
-            <option value="published">Publicado</option>
-          </select>
-        </label>
-        <label>
-          Desde
-          <input type="date" />
-        </label>
-        <label>
-          Hasta
-          <input type="date" />
-        </label>
-      </form>
-      <EmptyTable
-        columns={["Artículo", "Fecha", "Estado", "Página de inicio", "Acciones"]}
-        message="Todavía no hay noticias. Un borrador no se ve en el sitio público."
-      />
+      {posts.length === 0 ? (
+        <EmptyTable
+          columns={["Artículo", "Fecha", "Estado", "Página de inicio"]}
+          message="Todavía no hay noticias. Un borrador no se ve en el sitio público."
+        />
+      ) : (
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Artículo</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Página de inicio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {posts.map((post) => {
+                const date = new Date(post.publishedAt ?? post.createdAt);
+                const publishedIndex = posts
+                  .filter((item) => item.status === "published")
+                  .findIndex((item) => item.id === post.id);
+                return (
+                  <tr key={post.id}>
+                    <td>{post.title}</td>
+                    <td>
+                      {date.toLocaleDateString("es-MX", { timeZone: "America/Mexico_City" })}
+                    </td>
+                    <td>{post.status === "published" ? "Publicado" : "Borrador"}</td>
+                    <td>
+                      {post.status === "published" && publishedIndex >= 0 && publishedIndex < 3
+                        ? "Sí (reciente)"
+                        : "—"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }

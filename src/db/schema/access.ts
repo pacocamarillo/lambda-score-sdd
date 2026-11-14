@@ -29,6 +29,9 @@ export const organizations = pgTable("organization", {
   customDomain: text("custom_domain"),
   description: text("description"),
   advancedRolesEnabled: boolean("advanced_roles_enabled").notNull().default(false),
+  /** full = all admin tabs; events_coupons = limited replica */
+  navProfile: text("nav_profile").notNull().default("full"),
+  parentOrganizationId: uuid("parent_organization_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

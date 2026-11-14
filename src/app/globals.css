@@ -1259,3 +1259,46 @@ button:disabled,
 .legal-intro a {
   font-weight: 650;
 }
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.rich-editor {
+  min-height: 14rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.news-card {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.news-card img,
+.news-hero {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+}
+
+.news-body :is(h2, h3) {
+  margin: 0.4rem 0;
+}
+
+.news-body p {
+  margin: 0.35rem 0;
+}
