@@ -22,6 +22,16 @@ const changedAt = git("git log -1 --format=%cI") || new Date().toISOString();
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  transpilePackages: ["next-sanity", "sanity"],
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+      },
+    ],
+  },
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version ?? "0.0.0",
     NEXT_PUBLIC_APP_SHA: sha,
